@@ -30,6 +30,13 @@ const teamMembers = [
     github: "https://github.com/mohammedanfas",
     linkedin: "https://linkedin.com/in/mohammedanfas",
     image: "/team/anfas.jpg"
+  },
+  {
+    name: "Varshith Pawar HR",
+    role: "Mentor",
+    github: "https://github.com/VarshithPawarHR",
+    linkedin: "https://linkedin.com/in/VarshithPawarHR",
+    image: "/team/varshit.jpg"
   }
 ];
 
