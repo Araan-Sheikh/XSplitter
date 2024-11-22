@@ -8,7 +8,7 @@ const teamMembers = [
     role: "Full Stack Developer",
     github: "https://github.com/Araan-Sheikh",
     linkedin: "https://linkedin.com/in/mohammedaraan",
-    image: "/team/araan.jpg" // Add team member images to public/team folder
+    image: "https://avatars.githubusercontent.com/u/90261325?v=4" // Add team member images to public/team folder
   },
   {
     name: "Azfar",
@@ -36,7 +36,7 @@ const teamMembers = [
     role: "Mentor",
     github: "https://github.com/VarshithPawarHR",
     linkedin: "https://linkedin.com/in/VarshithPawarHR",
-    image: "/team/varshit.jpg"
+    image: "https://avatars.githubusercontent.com/u/143952673?v=4"
   }
 ];
 
