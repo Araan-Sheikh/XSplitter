@@ -37,7 +37,7 @@ export function LandingPage() {
           <Button size="lg" onClick={() => router.push('/create-group')}>
             Get Started
           </Button>
-          <Button size="lg" variant="outline" onClick={() => router.push('/demo')}>
+          <Button size="lg" variant="outline" onClick={() => router.push('/groups/674087765181ff991a7757f6')}>
             Try Demo
           </Button>
         </div>
