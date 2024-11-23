@@ -13,9 +13,9 @@ const teamMembers = [
   {
     name: "Azfar",
     role: "Backend Developer",
-    github: "https://github.com/azfar",
-    linkedin: "https://linkedin.com/in/azfar",
-    image: "/team/azfar.jpg"
+    github: "https://github.com/azfar-05",
+    linkedin: "https://www.linkedin.com/in/mohammad-azfar-44b133313/",
+    image: "https://avatars.githubusercontent.com/u/162698857?v=4"
   },
   {
     name: "Ayham Arif K",
