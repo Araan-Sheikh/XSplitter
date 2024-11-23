@@ -1,4 +1,4 @@
-// Define currency info interfaces
+// Define currency info interfaces using API we can fetch live rates this method which we had done is manual
 interface CurrencyInfo {
   name: string;
   symbol: string;
@@ -6,7 +6,7 @@ interface CurrencyInfo {
   decimals: number;
 }
 
-// Constants for currencies
+// Constants for currencies using usd as default currency, here more currencies can be defined
 export const FIAT_CURRENCIES: Record<string, CurrencyInfo> = {
   // Major Currencies
   USD: { name: 'US Dollar', symbol: '$', rate: 1, decimals: 2 },
