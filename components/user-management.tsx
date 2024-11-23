@@ -23,11 +23,12 @@ export function UserManagement({ members, onMemberAdded }: UserManagementProps) 
     e.preventDefault();
     
     const newMember: Member = {
-  id: new ObjectId().toString(),  
+  id: crypto.randomUUID(),  
   name,
   email,
   preferredCurrency
 };
+
 
     onMemberAdded(newMember);
     
