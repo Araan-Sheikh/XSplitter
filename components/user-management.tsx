@@ -7,6 +7,7 @@ import { FIAT_CURRENCIES, CRYPTO_CURRENCIES } from '@/utils/currency';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
+import { ObjectId } from 'mongodb';
 
 interface UserManagementProps {
   members: Member[];
@@ -22,11 +23,11 @@ export function UserManagement({ members, onMemberAdded }: UserManagementProps) 
     e.preventDefault();
     
     const newMember: Member = {
-      id: crypto.randomUUID(),
-      name,
-      email,
-      preferredCurrency
-    };
+  id: new ObjectId().toString(),  
+  name,
+  email,
+  preferredCurrency
+};
 
     onMemberAdded(newMember);
     
