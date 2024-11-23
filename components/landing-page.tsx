@@ -38,7 +38,7 @@ export function LandingPage() {
            <Image
           src="/logo.png"
           alt="XSplitter Logo"
-          width={150}
+          width={100}
           height={300}
              />
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
