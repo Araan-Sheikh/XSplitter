@@ -23,7 +23,6 @@ export function UserManagement({ members, onMemberAdded }: UserManagementProps) 
     e.preventDefault();
     
     const newMember: Member = {
-  id,  
   name,
   email,
   preferredCurrency
