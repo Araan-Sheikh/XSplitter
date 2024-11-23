@@ -28,6 +28,12 @@ Welcome to **XSplitter**, the ultimate solution for effortlessly managing shared
 - **Mobile Friendly**: Access your expenses on any device with our responsive design.
 - **Quick Actions**: Add expenses and settle bills with just a few clicks, making the process smooth and efficient.
 
+## Video Ad
+
+
+https://github.com/user-attachments/assets/c9a43ea1-8282-46cc-8a68-333817c00f32
+
+
 ## Getting Started
 
 To embark on your journey with XSplitter, follow these simple steps to set up the project locally.
