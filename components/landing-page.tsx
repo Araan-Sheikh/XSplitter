@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function LandingPage() {
   const router = useRouter();
@@ -34,10 +35,17 @@ export function LandingPage() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter">
             Welcome to XSplitter
           </h1>
+           <Image
+          src="/logo.png"
+          alt="XSplitter Logo"
+          width={150}
+          height={300}
+             />
           <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
             Split expenses effortlessly with friends, family, and roommates.
             Track shared costs and settle debts with ease.
           </p>
+          
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button size="lg" onClick={() => router.push("/create-group")}>
               Get Started
