@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export function LandingPage() {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,15 +17,31 @@ export function LandingPage() {
           <div className="flex items-center space-x-2">
             <h1 className="text-lg sm:text-2xl font-bold text-primary">XSplitter</h1>
           </div>
+          {/* Desktop Menu */}
           <div className="hidden sm:flex items-center space-x-4">
             <Button variant="ghost" onClick={() => router.push("/about")}>About</Button>
             <Button variant="ghost" onClick={() => router.push("/features")}>Features</Button>
             <Button onClick={() => router.push("/create-group")}>Create Group</Button>
           </div>
+          {/* Mobile Menu Button */}
           <div className="sm:hidden">
-            <Button onClick={() => router.push("/menu")}>Menu</Button>
+            <Button onClick={() => setMenuOpen(!menuOpen)}>Menu</Button>
           </div>
         </div>
+        {/* Mobile Menu Dropdown */}
+        {menuOpen && (
+          <div className="flex flex-col space-y-2 p-4 border-t bg-background sm:hidden">
+            <Button variant="ghost" onClick={() => { setMenuOpen(false); router.push("/about"); }}>
+              About
+            </Button>
+            <Button variant="ghost" onClick={() => { setMenuOpen(false); router.push("/features"); }}>
+              Features
+            </Button>
+            <Button onClick={() => { setMenuOpen(false); router.push("/create-group"); }}>
+              Create Group
+            </Button>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
