@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Member, Expense } from '@/types';
 import type { CurrencyCode } from '@/utils/currency';
 import { FIAT_CURRENCIES, CRYPTO_CURRENCIES } from '@/utils/currency';
@@ -26,6 +26,7 @@ import {
 } from './ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
+import { cn } from "@/lib/utils";
 
 // Expense categories
 const EXPENSE_CATEGORIES = [
@@ -61,10 +62,36 @@ export function ExpenseForm({ groupMembers, onAddExpense, baseCurrency }: Expens
   const [date, setDate] = useState<Date>(new Date());
   const [participants, setParticipants] = useState<string[]>(groupMembers.map(m => m.id));
   const [loading, setLoading] = useState(false);
+  const [splitMethod, setSplitMethod] = useState<'equal' | 'custom'>('equal');
+  const [customSplit, setCustomSplit] = useState<Record<string, number>>({});
+
+  // Add validation for custom split
+  const validateCustomSplit = (splits: Record<string, number>) => {
+    const total = Object.values(splits).reduce((sum, value) => sum + value, 0);
+    return Math.abs(total - 1) < 0.0001;
+  };
+
+  // Initialize custom split when participants change
+  useEffect(() => {
+    if (splitMethod === 'custom' && participants.length > 0) {
+      const equalShare = 1 / participants.length;
+      const newSplit = participants.reduce((acc, participantId) => {
+        acc[participantId] = equalShare;
+        return acc;
+      }, {} as Record<string, number>);
+      setCustomSplit(newSplit);
+    }
+  }, [participants, splitMethod]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !amount || !currency || !paidBy || participants.length === 0) return;
+
+    // Validate custom split if selected
+    if (splitMethod === 'custom' && !validateCustomSplit(customSplit)) {
+      // Add error handling here if needed
+      return;
+    }
 
     setLoading(true);
     try {
@@ -76,7 +103,8 @@ export function ExpenseForm({ groupMembers, onAddExpense, baseCurrency }: Expens
         category,
         date: date.toISOString(),
         participants,
-        splitMethod: 'equal'
+        splitMethod,
+        customSplit: splitMethod === 'custom' ? customSplit : undefined
       });
 
       // Reset form
@@ -87,6 +115,8 @@ export function ExpenseForm({ groupMembers, onAddExpense, baseCurrency }: Expens
       setCategory('Other');
       setDate(new Date());
       setParticipants(groupMembers.map(m => m.id));
+      setSplitMethod('equal');
+      setCustomSplit({});
     } catch (error) {
       console.error('Failed to add expense:', error);
     } finally {
@@ -227,10 +257,76 @@ export function ExpenseForm({ groupMembers, onAddExpense, baseCurrency }: Expens
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>Split Method</Label>
+            <Select
+              value={splitMethod}
+              onValueChange={(value: 'equal' | 'custom') => setSplitMethod(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select split method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="equal">Equal Split</SelectItem>
+                <SelectItem value="custom">Custom Split</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {splitMethod === 'custom' && participants.length > 0 && (
+            <div className="space-y-4">
+              <Label>Custom Split Percentages</Label>
+              <div className="space-y-2">
+                {participants.map(participantId => {
+                  const member = groupMembers.find(m => m.id === participantId);
+                  return (
+                    <div key={participantId} className="flex items-center gap-2">
+                      <span className="w-32">{member?.name}</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={(customSplit[participantId] * 100 || 0).toFixed(1)}
+                        onChange={(e) => {
+                          const numValue = parseFloat(e.target.value) / 100;
+                          if (isNaN(numValue)) return;
+                          setCustomSplit(prev => ({
+                            ...prev,
+                            [participantId]: numValue
+                          }));
+                        }}
+                        className="w-24"
+                      />
+                      <span>%</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={cn(
+                "text-sm",
+                validateCustomSplit(customSplit) ? "text-muted-foreground" : "text-destructive"
+              )}>
+                Total: {Object.values(customSplit).reduce((sum, value) => sum + value * 100, 0).toFixed(1)}%
+                {!validateCustomSplit(customSplit) && (
+                  <span className="ml-2">(Must sum to 100%)</span>
+                )}
+              </div>
+            </div>
+          )}
+
           <Button 
             type="submit" 
             className="w-full"
-            disabled={loading || !description || !amount || !currency || !paidBy || participants.length === 0}
+            disabled={
+              loading || 
+              !description || 
+              !amount || 
+              !currency || 
+              !paidBy || 
+              participants.length === 0 ||
+              (splitMethod === 'custom' && !validateCustomSplit(customSplit))
+            }
           >
             {loading ? 'Adding...' : 'Add Expense'}
           </Button>
