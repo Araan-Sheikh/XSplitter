@@ -23,7 +23,7 @@ export function UserManagement({ members, onMemberAdded }: UserManagementProps) 
     e.preventDefault();
     
     const newMember: Member = {
-  id: crypto.randomUUID(),  
+  id: string,  
   name,
   email,
   preferredCurrency
