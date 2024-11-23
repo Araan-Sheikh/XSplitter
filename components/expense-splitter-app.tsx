@@ -7,6 +7,7 @@ import { ExpenseList } from './expense-list';
 import { ExpenseForm } from './expense-form';
 import { UserManagement } from './user-management';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface GroupData {
   _id: string;
@@ -110,6 +111,15 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
     }
   };
 
+  const handleShareGroupLink = () => {
+    const groupUrl = `${window.location.origin}/groups/${groupId}`;
+    navigator.clipboard.writeText(groupUrl).then(() => {
+      alert('Group link copied to clipboard!');
+    }).catch(() => {
+      alert('Failed to copy group link. Please try again.');
+    });
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -146,9 +156,14 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
             <p className="text-muted-foreground">{group.description}</p>
           )}
         </div>
-        <Badge variant="outline">
-          Base Currency: {group.baseCurrency}
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <Badge variant="outline">
+            Base Currency: {group.baseCurrency}
+          </Badge>
+          <Button onClick={handleShareGroupLink}>
+            Share Group Link
+          </Button>
+        </div>
       </div>
 
       <UserManagement 
