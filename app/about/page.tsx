@@ -7,7 +7,7 @@ const teamMembers = [
     name: "Mohammed Araan",
     role: "Full Stack Developer",
     github: "https://github.com/Araan-Sheikh",
-    linkedin: "https://linkedin.com/in/mohammedaraan",
+    linkedin: "https://www.linkedin.com/in/araan-sheikh-523715327",
     image: "https://avatars.githubusercontent.com/u/90261325?v=4" // Add team member images to public/team folder
   },
   {
