@@ -5,28 +5,41 @@ Welcome to **XSplitter**, the ultimate solution for effortlessly managing shared
 ## Table of Contents
 
 - [Features](#features)
+- [Video Ad](#video-ad)
 - [Getting Started](#getting-started)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Technologies Used](#technologies-used)
+- [Tech Stack](#tech-stack)
 - [Contributing](#contributing)
 - [License](#license)
 
+### Why XSplitter?
+
+- **Simplify Group Finances**: No more complicated spreadsheets or confusion about who owes what
+- **Real-time Updates**: Keep everyone in the loop with instant expense notifications
+- **Smart Calculations**: Automatic currency conversion and split calculations
+- **Transparent History**: Complete expense history with detailed analytics
+- **User-Friendly Interface**: Clean, modern design that's easy to navigate
+
 ## Features
 
-- **Real-time Expense Tracking**: Instantly see updates as expenses are added, ensuring everyone is on the same page.
-- **Multi-Currency Support**: Effortlessly manage expenses in various currencies with automatic conversion rates.
-- **Smart Settlement Suggestions**: Get intelligent recommendations for settling debts with minimal transactions.
-- **Group Management**: Create and manage multiple groups for different occasions, making it easy to keep track of expenses.
-- **Expense Analytics**: Visualize your spending patterns with interactive charts and graphs.
-- **Category Tracking**: Organize expenses by categories, providing clarity and insight into your spending habits.
-- **Easy Sharing**: Share group links instantly with friends, allowing them to join the expense group with ease.
-- **Split Options**: Choose to split bills equally or with custom ratios tailored to your group's needs.
-- **Auto Sync**: All expenses and settlements automatically sync across devices, ensuring everyone has the latest information.
-- **Secure Transactions**: Your financial data is encrypted and securely stored, giving you peace of mind.
-- **Mobile Friendly**: Access your expenses on any device with our responsive design.
-- **Quick Actions**: Add expenses and settle bills with just a few clicks, making the process smooth and efficient.
+### Core Features
+- **Real-time Expense Tracking**: Track expenses as they happen with instant updates
+- **Multi-currency Support**: Handle expenses in different currencies with automatic conversion
+- **Smart Settlement**: Get intelligent suggestions for settling debts with minimum transactions
+- **Group Management**: Create and manage multiple expense groups
+- **Expense Analytics**: Visualize spending patterns with interactive charts
+- **Category Tracking**: Organize expenses by categories with detailed pie charts
+
+### Additional Features
+- **Easy Sharing**: Share group links instantly with friends
+- **Split Options**: Split bills equally or with custom ratios
+- **Auto Sync**: All expenses and settlements sync across devices
+- **Secure Transactions**: Encrypted financial data storage
+- **Mobile Friendly**: Responsive design for all devices
+- **Quick Actions**: Add expenses and settle bills efficiently
+
 
 ## Video Ad
 
@@ -147,14 +160,34 @@ XSplitter-H03
 
 - **README.md**: Your go-to documentation for understanding the project, setup instructions, and features.
 
-## Technologies Used
 
-- **Next.js**: A powerful React framework for building server-side rendered applications.
-- **TypeScript**: A superset of JavaScript that adds static types, enhancing code quality and maintainability.
-- **Tailwind CSS**: A utility-first CSS framework that allows for rapid UI development.
-- **MongoDB**: A NoSQL database for storing application data, providing flexibility and scalability.
-- **React**: A JavaScript library for building user interfaces, enabling a dynamic user experience.
-- **Lucide Icons**: A collection of icons used throughout the application for a polished look.
+## Tech Stack
+
+- **Frontend Framework**: Next.js 14
+  - App Router for improved routing and layouts
+  - Server Components for optimal performance
+  - API Routes for backend functionality
+- **Styling**: 
+  - Tailwind CSS for utility-first styling
+  - Custom theme configuration
+  - Responsive design principles
+- **UI Components**: 
+  - shadcn/ui for consistent design
+  - Custom components for specific features
+  - Radix UI primitives for accessibility
+- **Database**: 
+  - MongoDB with Mongoose
+  - Optimized schemas for expense tracking
+  - Efficient querying for analytics
+- **Authentication**: [Planned]
+  - OAuth integration
+  - JWT token management
+  - Role-based access control
+- **Charts**: 
+  - Chart.js for interactive visualizations
+  - Recharts for responsive charts
+  - Custom chart components
+- **Icons**: Lucide React
 
 ## Contributing
 
