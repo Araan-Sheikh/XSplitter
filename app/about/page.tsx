@@ -27,7 +27,7 @@ const teamMembers = [
   {
     name: "Mohammed Anfas",
     role: "UI/UX Designer",
-    github: "https://github.com/mohammedanfas",
+    github: "https://github.com/Sheikh-Anfas",
     linkedin: "https://linkedin.com/in/mohammedanfas",
     image: "/team/anfas.jpg"
   },
