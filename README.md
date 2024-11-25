@@ -55,8 +55,8 @@ To embark on your journey with XSplitter, follow these simple steps to set up th
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/XSplitter-H03.git
-   cd XSplitter-H03
+   git clone https://github.com/Araan-Sheikh/XSplitter.git
+   cd XSplitter
    ```
 
 2. **Install dependencies**:
@@ -97,7 +97,7 @@ To embark on your journey with XSplitter, follow these simple steps to set up th
 The project is organized in a way that promotes clarity and ease of navigation. Here’s a breakdown of the structure:
 
 ```
-XSplitter-H03
+XSplitter
 ├── app
 │   ├── about
 │   ├── create-group
