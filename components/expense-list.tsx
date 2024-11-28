@@ -176,7 +176,7 @@ export function ExpenseList({
     // Process each expense
     expenses.forEach(expense => {
       const { amount, currency, paidBy, participants, splitMethod, customSplit } = expense;
-      
+
       // Handle payer
       const payerSummary = summaries.find(s => s.member.id === paidBy);
       if (!payerSummary) return;
@@ -266,7 +266,7 @@ export function ExpenseList({
     while (i < debtors.length && j < creditors.length) {
       const debtor = debtors[i];
       const creditor = creditors[j];
-      
+
       const debtAmount = Math.abs(debtor.totalInBaseCurrency);
       const creditAmount = creditor.totalInBaseCurrency;
       const settlementAmount = Math.min(debtAmount, creditAmount);
@@ -378,7 +378,7 @@ export function ExpenseList({
   // Handle delete confirmation
   const handleDeleteConfirm = async () => {
     if (!expenseToDelete) return;
-    
+
     try {
       setIsDeleting(expenseToDelete);
       setError(null);
@@ -455,7 +455,7 @@ export function ExpenseList({
               History
             </TabsTrigger>
           </TabsList>
-          
+
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Input
               placeholder="Search expenses..."
@@ -464,7 +464,7 @@ export function ExpenseList({
               className="w-full sm:w-[200px]"
               leftIcon={<Search className="h-4 w-4" />}
             />
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -510,7 +510,7 @@ export function ExpenseList({
 
         <TabsContent value="balances" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {summaries.map(({ member, balances, totalInBaseCurrency }) => (
+            {summaries.map(({ member, balances, totalInBaseCurrency, totalInPreferredCurrency }) => (
               <Card 
                 key={member.id}
                 className={cn(
@@ -527,34 +527,95 @@ export function ExpenseList({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
+                    {/* Original Currency Balances */}
                     {Object.entries(balances).map(([currency, { paid, owed, net }]) => (
-                      <div key={currency} className="text-sm">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground">{currency}</span>
+                      <div key={currency} className="space-y-2 p-2 rounded-lg border bg-background/50">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{currency}</span>
                           <span className={cn(
-                            "font-medium",
+                            "font-medium text-sm",
                             net > 0 ? "text-green-600" : 
                             net < 0 ? "text-red-600" : "text-muted-foreground"
                           )}>
                             {formatCurrency(net, currency)}
                           </span>
                         </div>
+
+                        {/* Original Currency Details */}
                         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                           <div>Paid: {formatCurrency(paid, currency)}</div>
                           <div>Owed: {formatCurrency(owed, currency)}</div>
                         </div>
+
+                        {/* Converted to Preferred Currency */}
+                        {currency !== member.preferredCurrency && (
+                          <div className="pt-1 mt-1 border-t border-border">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-muted-foreground">In {member.preferredCurrency}:</span>
+                              <span className={cn(
+                                "font-medium",
+                                net > 0 ? "text-green-600" : 
+                                net < 0 ? "text-red-600" : "text-muted-foreground"
+                              )}>
+                                {formatCurrency(
+                                  convertAmount(net, currency as CurrencyCode, member.preferredCurrency as CurrencyCode),
+                                  member.preferredCurrency as CurrencyCode
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Converted to Base Currency */}
+                        {currency !== baseCurrency && (
+                          <div className="pt-1 border-t border-border">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="text-muted-foreground">In {baseCurrency}:</span>
+                              <span className={cn(
+                                "font-medium",
+                                net > 0 ? "text-green-600" : 
+                                net < 0 ? "text-red-600" : "text-muted-foreground"
+                              )}>
+                                {formatCurrency(
+                                  convertAmount(net, currency as CurrencyCode, baseCurrency),
+                                  baseCurrency
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
+
                     <Separator className="my-2" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Net Balance</span>
-                      <span className={cn(
-                        "text-sm font-bold",
-                        totalInBaseCurrency > 0 ? "text-green-600" : 
-                        totalInBaseCurrency < 0 ? "text-red-600" : "text-muted-foreground"
-                      )}>
-                        {formatCurrency(totalInBaseCurrency, baseCurrency)}
-                      </span>
+
+                    {/* Total Balances */}
+                    <div className="space-y-2">
+                      {/* Total in Preferred Currency */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Total ({member.preferredCurrency})</span>
+                        <span className={cn(
+                          "text-sm font-bold",
+                          totalInPreferredCurrency > 0 ? "text-green-600" : 
+                          totalInPreferredCurrency < 0 ? "text-red-600" : "text-muted-foreground"
+                        )}>
+                          {formatCurrency(totalInPreferredCurrency, member.preferredCurrency as CurrencyCode)}
+                        </span>
+                      </div>
+
+                      {/* Total in Base Currency */}
+                      {member.preferredCurrency !== baseCurrency && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Total ({baseCurrency})</span>
+                          <span className={cn(
+                            "font-bold",
+                            totalInBaseCurrency > 0 ? "text-green-600" : 
+                            totalInBaseCurrency < 0 ? "text-red-600" : "text-muted-foreground"
+                          )}>
+                            {formatCurrency(totalInBaseCurrency, baseCurrency)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
