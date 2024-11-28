@@ -132,7 +132,7 @@ export function LandingPage() {
               variant="outline" 
               size="lg"
               className="w-full sm:w-auto"
-              onClick={() => router.push("/groups/demo")}
+              onClick={() => router.push("/groups/674087765181ff991a7757f6")}
             >
               Try Demo
               <ChevronRight className="ml-2 h-4 w-4" />
