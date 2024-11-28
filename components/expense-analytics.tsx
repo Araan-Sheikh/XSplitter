@@ -223,203 +223,221 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
   }, [expenses, selectedCurrency, timePeriod]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Select
-          value={timePeriod}
-          onValueChange={setTimePeriod}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Time</SelectItem>
-            <SelectItem value="year">This Year</SelectItem>
-            <SelectItem value="month">This Month</SelectItem>
-            <SelectItem value="week">This Week</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="space-y-8">
+      <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">Financial Analytics</h2>
+          <p className="text-muted-foreground">
+            Track and analyze your spending patterns
+          </p>
+        </div>
+        <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+          <Select
+            value={timePeriod}
+            onValueChange={setTimePeriod}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Time Period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="year">This Year</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select
-          value={selectedCurrency}
-          onValueChange={setSelectedCurrency}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select currency" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableCurrencies.map(currency => (
-              <SelectItem key={currency} value={currency}>
-                {currency}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select
+            value={selectedCurrency}
+            onValueChange={setSelectedCurrency}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableCurrencies.map(currency => (
+                <SelectItem key={currency} value={currency}>
+                  {currency}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-primary/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium">
               Total Expenses
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(enhancedStatistics.total, selectedCurrency)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {enhancedStatistics.expenseCount} total transactions
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-blue-500/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Average per Expense
+            <CardTitle className="text-sm font-medium">
+              Monthly Average
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(enhancedStatistics.avg, selectedCurrency)}
+            <div className="text-2xl font-bold text-blue-500">
+              {formatCurrency(enhancedStatistics.monthlyAvg, selectedCurrency)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              per expense this month
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-green-500/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium">
               Highest Expense
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-green-500">
               {enhancedStatistics.highest ? formatCurrency(enhancedStatistics.highest.amount, selectedCurrency) : '-'}
             </div>
             {enhancedStatistics.highest && (
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 truncate">
                 {enhancedStatistics.highest.description}
               </p>
             )}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-orange-500/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Lowest Expense
+            <CardTitle className="text-sm font-medium">
+              This Month
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {enhancedStatistics.lowest ? formatCurrency(enhancedStatistics.lowest.amount, selectedCurrency) : '-'}
-            </div>
-            {enhancedStatistics.lowest && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {enhancedStatistics.lowest.description}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              This Month's Total
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-orange-500">
               {formatCurrency(enhancedStatistics.monthlyTotal, selectedCurrency)}
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {enhancedStatistics.monthlyExpenseCount} expenses
             </p>
           </CardContent>
         </Card>
+      </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Top Categories
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {enhancedStatistics.topCategories.map(({ category, amount, percentage }) => (
-                <div key={category} className="flex justify-between items-center">
-                  <span className="text-sm">{category}</span>
-                  <span className="text-sm font-medium">
-                    {percentage.toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Monthly Average
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(enhancedStatistics.monthlyAvg, selectedCurrency)}
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              per expense this month
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+        <Card className="col-span-1 lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Monthly Expense Trends</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Track your spending patterns over time
             </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Split Methods Analysis
-            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-sm text-muted-foreground">Equal Split</div>
-                  <div className="text-2xl font-bold">{splitMethodStats.equal}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Total: {formatCurrency(splitMethodStats.totalAmount.equal, selectedCurrency)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">Custom Split</div>
-                  <div className="text-2xl font-bold">{splitMethodStats.custom}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Total: {formatCurrency(splitMethodStats.totalAmount.custom, selectedCurrency)}
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Equal Split Usage</span>
-                  <span>
-                    {((splitMethodStats.equal / (splitMethodStats.equal + splitMethodStats.custom)) * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Custom Split Usage</span>
-                  <span>
-                    {((splitMethodStats.custom / (splitMethodStats.equal + splitMethodStats.custom)) * 100).toFixed(1)}%
-                  </span>
-                </div>
-              </div>
+            <div className="h-[350px]">
+              <Line 
+                data={{
+                  labels: monthlyData.labels,
+                  datasets: [{
+                    label: 'Monthly Total',
+                    data: monthlyData.values,
+                    borderColor: 'hsl(215, 100%, 50%)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: false,
+                    },
+                    tooltip: {
+                      backgroundColor: 'hsl(var(--background))',
+                      titleColor: 'hsl(var(--foreground))',
+                      bodyColor: 'hsl(var(--foreground))',
+                      borderColor: 'hsl(var(--border))',
+                      borderWidth: 1,
+                      padding: 16,
+                      callbacks: {
+                        label: (context) => {
+                          return formatCurrency(context.raw as number, selectedCurrency);
+                        },
+                      },
+                    },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: (value) => formatCurrency(value as number, selectedCurrency),
+                      },
+                    },
+                  },
+                }}
+              />
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Split Method Distribution</CardTitle>
+            <CardTitle>Category Distribution</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Breakdown of expenses by category
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] flex items-center justify-center">
+            <div className="h-[300px]">
+              <Pie 
+                data={pieChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'right' as const,
+                    },
+                    tooltip: {
+                      backgroundColor: 'hsl(var(--background))',
+                      titleColor: 'hsl(var(--foreground))',
+                      bodyColor: 'hsl(var(--foreground))',
+                      borderColor: 'hsl(var(--border))',
+                      borderWidth: 1,
+                      padding: 16,
+                      callbacks: {
+                        label: (context) => {
+                          const value = context.raw as number;
+                          return `${context.label}: ${formatCurrency(value, selectedCurrency)}`;
+                        },
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Split Methods</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Distribution of expense splitting methods
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
               <Pie 
                 data={{
                   labels: ['Equal Split', 'Custom Split'],
@@ -429,14 +447,25 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
                       splitMethodStats.totalAmount.custom
                     ],
                     backgroundColor: [
-                      '#36A2EB',
-                      '#FF6384'
+                      'hsl(215, 100%, 50%)',
+                      'hsl(345, 100%, 50%)'
                     ],
                   }]
                 }}
                 options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
                   plugins: {
+                    legend: {
+                      position: 'right' as const,
+                    },
                     tooltip: {
+                      backgroundColor: 'hsl(var(--background))',
+                      titleColor: 'hsl(var(--foreground))',
+                      bodyColor: 'hsl(var(--foreground))',
+                      borderColor: 'hsl(var(--border))',
+                      borderWidth: 1,
+                      padding: 16,
                       callbacks: {
                         label: (context) => {
                           const value = context.raw as number;
@@ -454,105 +483,36 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
 
       <Card>
         <CardHeader>
-          <CardTitle>Monthly Expense Trends</CardTitle>
+          <CardTitle>Top Categories</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Your highest spending categories
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px]">
-            <Line 
-              data={{
-                labels: monthlyData.labels,
-                datasets: [{
-                  label: 'Monthly Total',
-                  data: monthlyData.values,
-                  borderColor: '#36A2EB',
-                  backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                  tension: 0.4,
-                  fill: true,
-                }]
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const value = context.raw as number;
-                        return formatCurrency(value, selectedCurrency);
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (value) => formatCurrency(value as number, selectedCurrency),
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Daily Expense Trends</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <Line 
-              data={lineChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const value = context.raw as number;
-                        return formatCurrency(value, selectedCurrency);
-                      },
-                    },
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (value) => formatCurrency(value as number, selectedCurrency),
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Expense Distribution by Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
-            <Pie 
-              data={pieChartData}
-              options={{
-                plugins: {
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const value = context.raw as number;
-                        return `${context.label}: ${formatCurrency(value, selectedCurrency)}`;
-                      },
-                    },
-                  },
-                },
-              }}
-            />
+          <div className="space-y-4">
+            {enhancedStatistics.topCategories.map(({ category, amount, percentage }) => (
+              <div key={category} className="flex items-center">
+                <div className="w-1/3">
+                  <p className="text-sm font-medium">{category}</p>
+                </div>
+                <div className="w-2/3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-full bg-secondary h-2 rounded-full">
+                      <div 
+                        className="bg-primary h-2 rounded-full"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium">
+                      {percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {formatCurrency(amount, selectedCurrency)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

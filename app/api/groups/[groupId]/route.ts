@@ -19,7 +19,6 @@ export async function GET(
     }
 
     const group = await Group.findById(groupId);
-    console.log('Group found:', group); // Debug log
 
     if (!group) {
       return NextResponse.json(
@@ -31,7 +30,6 @@ export async function GET(
     return NextResponse.json({ group });
 
   } catch (error) {
-    console.error('Error fetching group:', error);
     return NextResponse.json(
       { error: 'Failed to fetch group' },
       { status: 500 }
@@ -45,38 +43,26 @@ export async function PUT(
 ) {
   try {
     await connectToDatabase();
-    
     const { groupId } = params;
-    const updateData = await request.json();
+    const updates = await request.json();
 
-    if (!groupId) {
-      return NextResponse.json(
-        { error: 'Group ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const updatedGroup = await Group.findByIdAndUpdate(
+    const group = await Group.findByIdAndUpdate(
       groupId,
-      { $set: updateData },
-      { new: true, runValidators: true }
+      { $set: updates },
+      { new: true }
     );
 
-    if (!updatedGroup) {
+    if (!group) {
       return NextResponse.json(
         { error: 'Group not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: updatedGroup });
+    return NextResponse.json({ group });
   } catch (error) {
-    console.error('Error updating group:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update group' 
-      },
+      { error: 'Failed to update group' },
       { status: 500 }
     );
   }
@@ -88,15 +74,7 @@ export async function DELETE(
 ) {
   try {
     await connectToDatabase();
-    
     const { groupId } = params;
-
-    if (!groupId) {
-      return NextResponse.json(
-        { error: 'Group ID is required' },
-        { status: 400 }
-      );
-    }
 
     const deletedGroup = await Group.findByIdAndDelete(groupId);
 
@@ -112,12 +90,8 @@ export async function DELETE(
       message: 'Group deleted successfully' 
     });
   } catch (error) {
-    console.error('Error deleting group:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to delete group' 
-      },
+      { error: 'Failed to delete group' },
       { status: 500 }
     );
   }

@@ -1,179 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Share2, Copy, Check, BarChart2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import Link from 'next/link';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Menu, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-interface NavbarProps {
-  groupId: string;
-  groupName: string;
-}
-
-const teamMembers = [
-  {
-    name: "Mohammed Araan",
-    initials: "MA",
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=MohammedAraan"
-  },
-  {
-    name: "Azfar",
-    initials: "AZ",
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Azfar"
-  },
-  {
-    name: "Ayham Arif K",
-    initials: "AA",
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=AyhamArif"
-  },
-  {
-    name: "Mohammed Anfas",
-    initials: "MA",
-    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=MohammedAnfas"
-  }
-];
-
-export function Navbar({ groupId, groupName }: NavbarProps) {
-  const [copied, setCopied] = useState(false);
-  const [shareLink, setShareLink] = useState('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Update share link when dialog opens
-  useEffect(() => {
-    if (isDialogOpen && groupId) {
-      // Use absolute URL with the current origin
-      const baseUrl = window.location.origin;
-      const joinLink = `${baseUrl}/groups/${groupId}/join`;
-      setShareLink(joinLink);
-    }
-  }, [isDialogOpen, groupId]);
-
-  const copyToClipboard = async () => {
-    if (!shareLink) {
-      toast.error('Unable to generate share link');
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      toast.success('Link copied to clipboard');
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      toast.error('Failed to copy link');
-      console.error('Copy failed:', err);
-    }
-  };
+export function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 border-b bg-white dark:bg-gray-950 shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {groupName ? (
-              <h1 className="text-lg font-semibold">{groupName}</h1>
-            ) : (
-              <Link href="/" className="text-lg font-semibold">
-                ExpenseShare
-              </Link>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {/* Team Members */}
-            <div className="flex -space-x-2">
-              {teamMembers.map((member) => (
-                <Avatar key={member.name} className="border-2 border-background">
-                  <AvatarImage src={member.avatarUrl} alt={member.name} />
-                  <AvatarFallback>{member.initials}</AvatarFallback>
-                </Avatar>
-              ))}
-            </div>
-
-            {/* Navigation Links */}
-            <Link href="/features">
-              <Button variant="ghost" size="sm">
-                Features
-              </Button>
-            </Link>
-
-            <Link href="/about">
-              <Button variant="ghost" size="sm">
-                About
-              </Button>
-            </Link>
-
-            {groupId && (
-              <>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex items-center"
-                  onClick={() => document.querySelector('[value="analytics"]')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <BarChart2 className="h-4 w-4 mr-2" />
-                  Analytics
-                </Button>
-
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex items-center"
-                      disabled={!groupId}
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share Group
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Share {groupName}</DialogTitle>
-                      <DialogDescription>
-                        Anyone with this link can join the group
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        readOnly
-                        value={shareLink}
-                        className="flex-1"
-                      />
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={copyToClipboard}
-                        className="shrink-0"
-                      >
-                        {copied ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      This link will allow others to join your group directly
-                    </p>
-                  </DialogContent>
-                </Dialog>
-              </>
-            )}
-          </div>
+    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
+          <Image 
+            src="/logo.png" 
+            alt="XSplitter Logo" 
+            width={32} 
+            height={32} 
+            className="w-8 h-8" 
+          />
+          <span className="text-xl font-bold text-primary">XSplitter</span>
         </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-6">
+          <Button variant="ghost" onClick={() => router.push("/about")}>About</Button>
+          <Button variant="ghost" onClick={() => router.push("/features")}>Features</Button>
+          <Button onClick={() => router.push("/create-group")}>Get Started</Button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
       </div>
-    </div>
+
+      {/* Mobile Navigation */}
+      {menuOpen && (
+        <motion.div 
+          className="md:hidden border-t"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+        >
+          <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            <Button variant="ghost" className="w-full justify-start" onClick={() => { setMenuOpen(false); router.push("/about"); }}>
+              About
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" onClick={() => { setMenuOpen(false); router.push("/features"); }}>
+              Features
+            </Button>
+            <Button className="w-full justify-start" onClick={() => { setMenuOpen(false); router.push("/create-group"); }}>
+              Get Started
+            </Button>
+          </div>
+        </motion.div>
+      )}
+    </nav>
   );
 } 

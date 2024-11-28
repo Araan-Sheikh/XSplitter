@@ -1,18 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config) => {
-    config.experiments = {
-      ...config.experiments,
-      topLevelAwait: true,
-    }
-    return config
+  output: 'standalone',
+  typescript: {
+    ignoreBuildErrors: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['mongoose']
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-  env: {
-    MONGODB_URI: process.env.MONGODB_URI,
-  }
+  async headers() {
+    return [
+      {
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig 

@@ -29,7 +29,14 @@ export const FIAT_CURRENCIES: Record<string, CurrencyInfo> = {
   IDR: { name: 'Indonesian Rupiah', symbol: 'Rp', rate: 0.000065, decimals: 2 },
   VND: { name: 'Vietnamese Dong', symbol: '₫', rate: 0.000042, decimals: 0 },
   
-  // Europe
+  // Asia Pacific (Additional)
+  BDT: { name: 'Bangladeshi Taka', symbol: '৳', rate: 0.0091, decimals: 2 },
+  PKR: { name: 'Pakistani Rupee', symbol: '₨', rate: 0.0036, decimals: 2 },
+  NPR: { name: 'Nepalese Rupee', symbol: '₨', rate: 0.0075, decimals: 2 },
+  LKR: { name: 'Sri Lankan Rupee', symbol: 'Rs', rate: 0.0031, decimals: 2 },
+  MMK: { name: 'Myanmar Kyat', symbol: 'K', rate: 0.00048, decimals: 2 },
+  KHR: { name: 'Cambodian Riel', symbol: '៛', rate: 0.00025, decimals: 2 },
+  LAK: { name: 'Laotian Kip', symbol: '₭', rate: 0.000052, decimals: 2 },
   CHF: { name: 'Swiss Franc', symbol: 'Fr', rate: 1.13, decimals: 2 },
   SEK: { name: 'Swedish Krona', symbol: 'kr', rate: 0.097, decimals: 2 },
   NOK: { name: 'Norwegian Krone', symbol: 'kr', rate: 0.095, decimals: 2 },
@@ -39,8 +46,12 @@ export const FIAT_CURRENCIES: Record<string, CurrencyInfo> = {
   HUF: { name: 'Hungarian Forint', symbol: 'Ft', rate: 0.0028, decimals: 2 },
   RON: { name: 'Romanian Leu', symbol: 'lei', rate: 0.22, decimals: 2 },
   BGN: { name: 'Bulgarian Lev', symbol: 'лв', rate: 0.56, decimals: 2 },
+  ISK: { name: 'Icelandic Króna', symbol: 'kr', rate: 0.0074, decimals: 2 },
+  HRK: { name: 'Croatian Kuna', symbol: 'kn', rate: 0.14, decimals: 2 },
+  RSD: { name: 'Serbian Dinar', symbol: 'дин.', rate: 0.0094, decimals: 2 },
+  UAH: { name: 'Ukrainian Hryvnia', symbol: '₴', rate: 0.027, decimals: 2 },
   
-  // Americas
+  // American
   CAD: { name: 'Canadian Dollar', symbol: 'C$', rate: 0.75, decimals: 2 },
   MXN: { name: 'Mexican Peso', symbol: 'Mex$', rate: 0.061, decimals: 2 },
   BRL: { name: 'Brazilian Real', symbol: 'R$', rate: 0.21, decimals: 2 },
@@ -48,20 +59,32 @@ export const FIAT_CURRENCIES: Record<string, CurrencyInfo> = {
   CLP: { name: 'Chilean Peso', symbol: '$', rate: 0.00012, decimals: 0 },
   COP: { name: 'Colombian Peso', symbol: '$', rate: 0.00026, decimals: 2 },
   PEN: { name: 'Peruvian Sol', symbol: 'S/', rate: 0.28, decimals: 2 },
+  UYU: { name: 'Uruguayan Peso', symbol: '$U', rate: 0.026, decimals: 2 },
+  BOB: { name: 'Bolivian Boliviano', symbol: 'Bs.', rate: 0.145, decimals: 2 },
+  PYG: { name: 'Paraguayan Guaraní', symbol: '₲', rate: 0.00014, decimals: 0 },
+  VES: { name: 'Venezuelan Bolívar', symbol: 'Bs.', rate: 0.028, decimals: 2 },
   
-  // Middle East & Africa
+  // African
+  ZAR: { name: 'South African Rand', symbol: 'R', rate: 0.055, decimals: 2 },
+  NGN: { name: 'Nigerian Naira', symbol: '₦', rate: 0.00077, decimals: 2 },
+  KES: { name: 'Kenyan Shilling', symbol: 'KSh', rate: 0.0079, decimals: 2 },
+  GHS: { name: 'Ghanaian Cedi', symbol: '₵', rate: 0.083, decimals: 2 },
+  UGX: { name: 'Ugandan Shilling', symbol: 'USh', rate: 0.00027, decimals: 0 },
+  TZS: { name: 'Tanzanian Shilling', symbol: 'TSh', rate: 0.00040, decimals: 2 },
+  RWF: { name: 'Rwandan Franc', symbol: 'FRw', rate: 0.00087, decimals: 0 },
+  ETB: { name: 'Ethiopian Birr', symbol: 'Br', rate: 0.018, decimals: 2 },
+  
+  // Middle East
   AED: { name: 'UAE Dirham', symbol: 'د.إ', rate: 0.28, decimals: 2 },
   SAR: { name: 'Saudi Riyal', symbol: '﷼', rate: 0.28, decimals: 2 },
   QAR: { name: 'Qatari Riyal', symbol: 'ر.ق', rate: 0.28, decimals: 2 },
   KWD: { name: 'Kuwaiti Dinar', symbol: 'د.ك', rate: 3.30, decimals: 3 },
   BHD: { name: 'Bahraini Dinar', symbol: '.د.ب', rate: 2.70, decimals: 3 },
   OMR: { name: 'Omani Rial', symbol: 'ر.ع.', rate: 2.65, decimals: 3 },
-  EGP: { name: 'Egyptian Pound', symbol: 'E£', rate: 0.034, decimals: 2 },
-  ZAR: { name: 'South African Rand', symbol: 'R', rate: 0.055, decimals: 2 },
-  NGN: { name: 'Nigerian Naira', symbol: '₦', rate: 0.00077, decimals: 2 },
-  KES: { name: 'Kenyan Shilling', symbol: 'KSh', rate: 0.0079, decimals: 2 },
-  TRY: { name: 'Turkish Lira', symbol: '₺', rate: 0.033, decimals: 2 },
-  ILS: { name: 'Israeli Shekel', symbol: '₪', rate: 0.29, decimals: 2 },
+  JOD: { name: 'Jordanian Dinar', symbol: 'د.ا', rate: 1.41, decimals: 3 },
+  LBP: { name: 'Lebanese Pound', symbol: 'ل.ل', rate: 0.000067, decimals: 2 },
+  IQD: { name: 'Iraqi Dinar', symbol: 'ع.د', rate: 0.00076, decimals: 3 },
+  YER: { name: 'Yemeni Rial', symbol: '﷼', rate: 0.0040, decimals: 2 },
 } as const;
 
 export const CRYPTO_CURRENCIES: Record<string, CurrencyInfo> = {
@@ -106,7 +129,7 @@ export const isFiatCurrency = (currency: string): currency is FiatCurrencyCode =
   return currency in FIAT_CURRENCIES;
 };
 
-// Currency formatting function with proper decimal handling
+// Currency formatting 
 export const formatCurrency = (amount: number, currency: CurrencyCode): string => {
   if (isCryptoCurrency(currency)) {
     const formatter = new Intl.NumberFormat('en-US', {
@@ -164,7 +187,6 @@ export const validateCurrency = (currency: string): CurrencyCode => {
   throw new Error(`Invalid currency: ${currency}`);
 };
 
-// Helper functions for currency info
 export const getCurrencyName = (currency: CurrencyCode): string => {
   if (isCryptoCurrency(currency)) {
     return CRYPTO_CURRENCIES[currency].name;
@@ -185,4 +207,107 @@ export const getCurrencyRate = (currency: CurrencyCode): number => {
   }
   return FIAT_CURRENCIES[currency].rate;
 };
+
+interface ExchangeRateResponse {
+  rates: Record<string, number>;
+  timestamp: number;
+}
+
+interface CryptoRateResponse {
+  [key: string]: {
+    usd: number;
+  };
+}
+
+export const updateFiatRates = async (): Promise<void> => {
+  try {
+    console.log('Fetching fiat rates...');
+    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data: ExchangeRateResponse = await response.json();
+    console.log('Received fiat rates:', data);
+    
+    Object.keys(FIAT_CURRENCIES).forEach(currency => {
+      if (currency in data.rates) {
+        FIAT_CURRENCIES[currency as FiatCurrencyCode].rate = 1 / data.rates[currency];
+      }
+    });
+  } catch (error) {
+    console.error('Failed to update fiat currency rates:', error);
+  }
+};
+
+const COINGECKO_IDS: Record<string, string> = {
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  USDT: 'tether',
+  USDC: 'usd-coin',
+  DAI: 'dai',
+  BNB: 'binancecoin',
+  SOL: 'solana',
+  XRP: 'ripple',
+  ADA: 'cardano',
+  AVAX: 'avalanche-2',
+  DOT: 'polkadot',
+  MATIC: 'matic-network',
+  LINK: 'chainlink',
+  ATOM: 'cosmos',
+  UNI: 'uniswap',
+  DOGE: 'dogecoin',
+  SHIB: 'shiba-inu',
+  PEPE: 'pepe'
+};
+
+export const updateCryptoRates = async (): Promise<void> => {
+  try {
+    console.log('Fetching crypto rates...');
+    const cryptoIds = Object.values(COINGECKO_IDS).join(',');
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${cryptoIds}&vs_currencies=usd`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data: CryptoRateResponse = await response.json();
+    console.log('Received crypto rates:', data);
+    
+    // Update rates using the mapping
+    Object.entries(COINGECKO_IDS).forEach(([currency, id]) => {
+      if (data[id]) {
+        CRYPTO_CURRENCIES[currency as CryptoCurrencyCode].rate = data[id].usd;
+      }
+    });
+  } catch (error) {
+    console.error('Failed to update crypto currency rates:', error);
+  }
+};
+
+export const initializeCurrencyRates = async (): Promise<void> => {
+  await Promise.all([
+    updateFiatRates(),
+    updateCryptoRates()
+  ]);
+};
+
+export const startRateUpdates = async (intervalMinutes: number = 5): Promise<void> => {
+  await initializeCurrencyRates();
   
+  setInterval(() => {
+    initializeCurrencyRates();
+  }, intervalMinutes * 60 * 1000);
+};
+
+import type { CurrencyCode } from './types';
+
+export function convertCurrency(
+  amount: number,
+  fromCurrency: CurrencyCode,
+  toCurrency: CurrencyCode
+): number {
+  if (fromCurrency === toCurrency) return amount;
+  return amount;
+}

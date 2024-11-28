@@ -21,11 +21,47 @@ import {
   FIAT_CURRENCIES,
   CRYPTO_CURRENCIES,
   type CurrencyCode,
-  isCryptoCurrency
+  isCryptoCurrency,
+  startRateUpdates,
 } from '@/utils/currency';
 import type { Member, Expense } from '@/types';
-import { Loader2 } from "lucide-react";
+import { 
+  Calendar,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Search,
+  PieChart,
+  Download,
+  Share2,
+  X,
+  Trash2,
+  Receipt,
+  Loader2,
+  ArrowUpDown,
+  ArrowRight,
+  Check
+} from "lucide-react";
 import { ExpenseAnalytics } from './expense-analytics';
+import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -74,7 +110,30 @@ export function ExpenseList({
 }: ExpenseListProps) {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingRates, setIsLoadingRates] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
 
+  // Initialize and update rates
+  useEffect(() => {
+    const initRates = async () => {
+      try {
+        setIsLoadingRates(true);
+        await startRateUpdates(5);
+        setIsLoadingRates(false);
+      } catch (err) {
+        console.error('Failed to initialize rates:', err);
+        setError('Failed to load currency rates');
+        setIsLoadingRates(false);
+      }
+    };
+
+    initRates();
+  }, []);
+
+  // Add back the handleDeleteExpense function
   const handleDeleteExpense = async (expenseId: string) => {
     try {
       setIsDeleting(expenseId);
@@ -101,6 +160,11 @@ export function ExpenseList({
   };
 
   const calculateBalances = useCallback(() => {
+    console.log('Current rates:', {
+      fiat: FIAT_CURRENCIES,
+      crypto: CRYPTO_CURRENCIES
+    });
+
     // Initialize member summaries with empty balances
     const summaries: MemberSummary[] = groupMembers.map(member => ({
       member,
@@ -117,7 +181,6 @@ export function ExpenseList({
       const payerSummary = summaries.find(s => s.member.id === paidBy);
       if (!payerSummary) return;
 
-      // Initialize or update currency balance for payer
       if (!payerSummary.balances[currency]) {
         payerSummary.balances[currency] = { paid: 0, owed: 0, net: 0 };
       }
@@ -249,260 +312,505 @@ export function ExpenseList({
     return { summaries, settlements };
   }, [expenses, groupMembers, baseCurrency]);
 
-  // Use the calculation results
+  // Calculate balances using the callback
   const { summaries, settlements } = useMemo(() => calculateBalances(), [calculateBalances]);
 
-  // Render function with improved display
-  return (
-    <Tabs defaultValue="summary" className="w-full space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
-  <TabsTrigger value="summary">Summary</TabsTrigger>
-  <TabsTrigger value="analytics">Analytics</TabsTrigger>
-  <TabsTrigger value="settlements">Settlements</TabsTrigger>
-  <TabsTrigger value="history">History</TabsTrigger>
-</TabsList>
+  // Get unique categories
+  const categories = useMemo(() => 
+    Array.from(new Set(expenses.map(e => e.category))),
+    [expenses]
+  );
 
-      <TabsContent value="summary" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>{groupName} - Expense Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[200px]">
-              {summaries.map(({ member, balances, totalInPreferredCurrency }) => (
-                <Card key={member.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{member.name}</span>
-                      <Badge 
-                        variant={totalInPreferredCurrency >= 0 ? "secondary" : "destructive"}
-                        className="text-lg"
-                      >
-                        {formatCurrency(
-                          Math.abs(totalInPreferredCurrency), 
-                          member.preferredCurrency as CurrencyCode
-                        )}
-                        {totalInPreferredCurrency < 0 ? ' (owes)' : ' (gets)'}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>
-                      Preferred Currency: {member.preferredCurrency}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[200px]">
-                      {Object.entries(balances)
-                        .filter(([_, balance]) => balance.paid !== 0 || balance.owed !== 0)
-                        .map(([currency, balance]) => (
-                          <div key={currency} className="mb-4 p-3 rounded-lg bg-muted/30">
-                            <div className="font-medium mb-2">{currency}</div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Paid:</span>
-                                <span className="text-green-600">
-                                  {formatCurrency(balance.paid, currency as CurrencyCode)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Owed:</span>
-                                <span className="text-red-600">
-                                  {formatCurrency(balance.owed, currency as CurrencyCode)}
-                                </span>
-                              </div>
-                              <Separator />
-                              <div className="flex justify-between font-medium">
-                                <span>Net in {currency}:</span>
-                                <span className={balance.net >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                  {formatCurrency(balance.net, currency as CurrencyCode)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between font-medium">
-                                <span>In {member.preferredCurrency}:</span>
-                                <span className={balance.net >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                  {formatCurrency(
-                                    convertAmount(
-                                      balance.net,
-                                      currency as CurrencyCode,
-                                      member.preferredCurrency as CurrencyCode
-                                    ),
-                                    member.preferredCurrency as CurrencyCode
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="analytics" className="space-y-4">
-   <ExpenseAnalytics 
-    expenses={expenses}
-    baseCurrency={baseCurrency}
-   />
-</TabsContent>
+  // Filter and sort expenses
+  const filteredExpenses = useMemo(() => {
+    return expenses
+      .filter(expense => {
+        const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = !filterCategory || expense.category === filterCategory;
+        return matchesSearch && matchesCategory;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      });
+  }, [expenses, searchTerm, filterCategory, sortOrder]);
 
-      <TabsContent value="settlements" className="space-y-4">
-        {settlements.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground">All settled up! No payments needed.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {settlements.map((settlement, index) => {
-              const from = groupMembers.find(m => m.id === settlement.from);
-              const to = groupMembers.find(m => m.id === settlement.to);
-              return (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Settlement #{index + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium text-red-600">{from?.name}</span>
-                          <span>→</span>
-                          <span className="font-medium text-green-600">{to?.name}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Group Currency ({baseCurrency}):</span>
-                          <Badge variant="secondary">
-                            {formatCurrency(settlement.amount, settlement.currency)}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            {from?.name}'s Currency ({settlement.preferredCurrency}):
-                          </span>
-                          <Badge variant="outline">
-                            {formatCurrency(
-                              settlement.amountInPreferredCurrency,
-                              settlement.preferredCurrency
-                            )}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">
-                            {to?.name}'s Currency ({settlement.creditorPreferredCurrency}):
-                          </span>
-                          <Badge variant="outline">
-                            {formatCurrency(
-                              settlement.amountInCreditorCurrency,
-                              settlement.creditorPreferredCurrency
-                            )}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+  // Export expenses to CSV
+  const exportToCSV = () => {
+    const headers = ['Date', 'Description', 'Amount', 'Currency', 'Category', 'Paid By', 'Split Method'];
+    const rows = filteredExpenses.map(expense => [
+      new Date(expense.date).toLocaleDateString(),
+      expense.description,
+      expense.amount,
+      expense.currency,
+      expense.category,
+      groupMembers.find(m => m.id === expense.paidBy)?.name,
+      expense.splitMethod
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${groupName}-expenses.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success('Expenses exported successfully!');
+  };
+
+  // Filter expenses for history tab
+  const filteredHistoryExpenses = useMemo(() => {
+    return expenses
+      .filter(expense => 
+        expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        expense.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        groupMembers.find(m => m.id === expense.paidBy)?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [expenses, searchTerm, groupMembers]);
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    if (!expenseToDelete) return;
+    
+    try {
+      setIsDeleting(expenseToDelete);
+      setError(null);
+
+      const response = await fetch(`/api/groups/${groupId}/expenses/${expenseToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete expense');
+      }
+
+      await onDeleteExpense(expenseToDelete);
+      toast.success('Expense deleted successfully');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete expense');
+      toast.error('Failed to delete expense');
+    } finally {
+      setIsDeleting(null);
+      setExpenseToDelete(null);
+    }
+  };
+
+  // Loading state with improved UI
+  if (isLoadingRates) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <div className="space-y-2 text-center">
+            <h3 className="font-semibold">Initializing Currencies</h3>
+            <p className="text-sm text-muted-foreground">
+              Fetching latest exchange rates...
+            </p>
           </div>
-        )}
-      </TabsContent>
+        </CardContent>
+      </Card>
+    );
+  }
 
-      <TabsContent value="history" className="space-y-4">
-        <div className="grid gap-4">
-          {expenses.length === 0 ? (
+  // Error state with improved UI
+  if (error) {
+    return (
+      <Card className="w-full border-destructive">
+        <CardContent className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+          <div className="p-3 rounded-full bg-destructive/10">
+            <X className="h-10 w-10 text-destructive" />
+          </div>
+          <div className="space-y-2 text-center">
+            <h3 className="font-semibold text-destructive">Error Loading Rates</h3>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="balances" className="w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <TabsList className="grid w-full sm:w-[400px] grid-cols-3">
+            <TabsTrigger value="balances" className="flex items-center gap-2">
+              <ArrowUpDown className="h-4 w-4" />
+              Balances
+            </TabsTrigger>
+            <TabsTrigger value="settlements" className="flex items-center gap-2">
+              <ArrowRight className="h-4 w-4" />
+              Settlements
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <Receipt className="h-4 w-4" />
+              History
+            </TabsTrigger>
+          </TabsList>
+          
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Input
+              placeholder="Search expenses..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-[200px]"
+              leftIcon={<Search className="h-4 w-4" />}
+            />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <div className="p-2 text-sm font-medium">Categories</div>
+                <DropdownMenuItem onClick={() => setFilterCategory(null)}>
+                  <Check className={cn("mr-2 h-4 w-4", !filterCategory && "opacity-100")} />
+                  All Categories
+                </DropdownMenuItem>
+                {categories.map(category => (
+                  <DropdownMenuItem key={category} onClick={() => setFilterCategory(category)}>
+                    <Check className={cn("mr-2 h-4 w-4", filterCategory === category && "opacity-100")} />
+                    {category}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+            >
+              {sortOrder === 'asc' ? (
+                <SortAsc className="h-4 w-4" />
+              ) : (
+                <SortDesc className="h-4 w-4" />
+              )}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={exportToCSV}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <TabsContent value="balances" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {summaries.map(({ member, balances, totalInBaseCurrency }) => (
+              <Card 
+                key={member.id}
+                className={cn(
+                  "transition-colors",
+                  totalInBaseCurrency > 0 ? "bg-green-500/5" : 
+                  totalInBaseCurrency < 0 ? "bg-red-500/5" : "bg-muted/50"
+                )}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-base font-medium">{member.name}</span>
+                    <Badge variant="outline">{member.preferredCurrency}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {Object.entries(balances).map(([currency, { paid, owed, net }]) => (
+                      <div key={currency} className="text-sm">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-muted-foreground">{currency}</span>
+                          <span className={cn(
+                            "font-medium",
+                            net > 0 ? "text-green-600" : 
+                            net < 0 ? "text-red-600" : "text-muted-foreground"
+                          )}>
+                            {formatCurrency(net, currency)}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                          <div>Paid: {formatCurrency(paid, currency)}</div>
+                          <div>Owed: {formatCurrency(owed, currency)}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Net Balance</span>
+                      <span className={cn(
+                        "text-sm font-bold",
+                        totalInBaseCurrency > 0 ? "text-green-600" : 
+                        totalInBaseCurrency < 0 ? "text-red-600" : "text-muted-foreground"
+                      )}>
+                        {formatCurrency(totalInBaseCurrency, baseCurrency)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settlements" className="space-y-4">
+          {settlements.length === 0 ? (
             <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground">No expenses yet. Add your first expense!</p>
+              <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
+                <div className="p-3 rounded-full bg-muted">
+                  <Check className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="font-semibold">All Settled Up!</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Everyone has been paid back.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           ) : (
-            expenses.map(expense => {
-              const payer = groupMembers.find(m => m.id === expense.paidBy);
-              const participantNames = expense.participants
-                .map(id => groupMembers.find(m => m.id === id)?.name)
-                .filter(Boolean);
-              
-              return (
-                <Card key={expense.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle>{expense.description}</CardTitle>
-                        <CardDescription>
-                          {new Date(expense.date).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </CardDescription>
-                      </div>
-                      <Badge variant="secondary" className="text-lg">
-                        {formatCurrency(expense.amount, expense.currency)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-1">Paid by</div>
-                        <div className="font-medium">{payer?.name}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground mb-1">Split between</div>
-                        <div className="flex flex-wrap gap-2">
-                          {participantNames.map((name, index) => (
-                            <Badge key={index} variant="outline">
-                              {name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      {expense.splitMethod === 'custom' && expense.customSplit && (
-                        <div>
-                          <div className="text-sm text-muted-foreground mb-1">Custom split</div>
-                          <div className="grid gap-1">
-                            {Object.entries(expense.customSplit).map(([userId, percentage]) => {
-                              const user = groupMembers.find(m => m.id === userId);
-                              return (
-                                <div key={userId} className="flex justify-between text-sm">
-                                  <span>{user?.name}</span>
-                                  <span>{(percentage * 100).toFixed(1)}%</span>
-                                </div>
-                              );
-                            })}
+            <div className="grid gap-4 md:grid-cols-2">
+              {settlements.map((settlement, index) => {
+                const from = groupMembers.find(m => m.id === settlement.from);
+                const to = groupMembers.find(m => m.id === settlement.to);
+                return (
+                  <Card key={index} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-red-600">{from?.name}</span>
+                            <ArrowRight className="h-4 w-4" />
+                            <span className="text-green-600">{to?.name}</span>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-end space-x-2">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteExpense(expense.id)}
-                      disabled={isDeleting === expense.id}
-                    >
-                      {isDeleting === expense.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Deleting...
-                        </>
-                      ) : (
-                        'Delete'
-                      )}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center p-2 rounded-lg bg-muted">
+                          <span className="text-sm">Group Currency</span>
+                          <Badge variant="secondary" className="font-mono">
+                            {formatCurrency(settlement.amount, settlement.currency)}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground">
+                              {from?.name}'s Currency
+                            </span>
+                            <div className="p-2 rounded-lg border">
+                              <span className="font-mono text-sm">
+                                {formatCurrency(
+                                  settlement.amountInPreferredCurrency,
+                                  settlement.preferredCurrency
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-xs text-muted-foreground">
+                              {to?.name}'s Currency
+                            </span>
+                            <div className="p-2 rounded-lg border">
+                              <span className="font-mono text-sm">
+                                {formatCurrency(
+                                  settlement.amountInCreditorCurrency,
+                                  settlement.creditorPreferredCurrency
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
-        </div>
-      </TabsContent>
-    </Tabs>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4">
+          <div className="space-y-4">
+            {/* Search bar only for history tab */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search by description, category, or payer..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {searchTerm && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setSearchTerm("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+
+            {filteredHistoryExpenses.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <div className="p-3 rounded-full bg-muted">
+                    <Receipt className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h3 className="font-semibold">
+                      {searchTerm ? 'No matching expenses found' : 'No expenses yet'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {searchTerm ? 'Try adjusting your search terms' : 'Add your first expense to get started!'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {filteredHistoryExpenses.map(expense => (
+                  <Card key={expense.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <CardTitle className="flex items-center gap-2">
+                            {expense.description}
+                            <Badge variant="outline">{expense.category}</Badge>
+                          </CardTitle>
+                          <CardDescription>
+                            {new Date(expense.date).toLocaleDateString(undefined, {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="secondary" className="font-mono">
+                          {formatCurrency(expense.amount, expense.currency)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-4">
+                          <div>
+                            <div className="text-sm text-muted-foreground mb-1">Paid by</div>
+                            <Badge variant="outline" className="bg-green-500/5">
+                              {groupMembers.find(m => m.id === expense.paidBy)?.name}
+                            </Badge>
+                          </div>
+                          <div>
+                            <div className="text-sm text-muted-foreground mb-1">Split Method</div>
+                            <Badge variant="outline">
+                              {expense.splitMethod === 'equal' ? 'Equal Split' : 'Custom Split'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground mb-2">Split between</div>
+                          <div className="flex flex-wrap gap-2">
+                            {expense.participants
+                              .map(id => groupMembers.find(m => m.id === id)?.name)
+                              .filter(Boolean)
+                              .map((name, index) => (
+                                <Badge key={index} variant="secondary">
+                                  {name}
+                                </Badge>
+                              ))}
+                          </div>
+                        </div>
+                        {expense.splitMethod === 'custom' && expense.customSplit && (
+                          <div>
+                            <div className="text-sm text-muted-foreground mb-2">Split Details</div>
+                            <div className="grid gap-1.5">
+                              {Object.entries(expense.customSplit).map(([userId, percentage]) => {
+                                const user = groupMembers.find(m => m.id === userId);
+                                return (
+                                  <div key={userId} className="flex justify-between items-center p-2 rounded-lg bg-muted">
+                                    <span className="text-sm">{user?.name}</span>
+                                    <span className="text-sm font-mono">
+                                      {(percentage * 100).toFixed(1)}%
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          navigator.clipboard.writeText(
+                            `${expense.description}: ${formatCurrency(expense.amount, expense.currency)}`
+                          );
+                          toast.success('Expense details copied to clipboard!');
+                        }}>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share
+                        </Button>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setExpenseToDelete(expense.id)}
+                        disabled={isDeleting === expense.id}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Expense</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this expense? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
