@@ -161,7 +161,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
         transition={{ duration: 0.5, delay: 2 }}
       >
         <div className="relative">
-          {/* Animated circles background */}
           <motion.div
             className="absolute -inset-32 opacity-20"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -172,14 +171,12 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/80 to-primary/20 rounded-full blur-2xl" />
           </motion.div>
 
-          {/* Logo and text animation */}
           <motion.div 
             className="relative flex flex-col items-center"
             initial={{ y: 20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Animated logo */}
             <motion.div
               className="mb-8 relative"
               initial={{ scale: 0.5, opacity: 0 }}
@@ -201,7 +198,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
                   />
                 </motion.div>
               </div>
-              {/* Animated rings */}
               <motion.div
                 className="absolute inset-0 border-4 border-white/30 rounded-full"
                 initial={{ scale: 1.2, opacity: 0 }}
@@ -216,7 +212,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
               />
             </motion.div>
 
-            {/* Text animations */}
             <motion.h1
               className="text-4xl font-bold text-white mb-2"
               initial={{ opacity: 0, y: 20 }}
@@ -273,7 +268,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with improved styling */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -299,7 +293,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
               </div>
             </div>
             
-            {/* Improved share dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center">
@@ -339,7 +332,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
         </div>
       </div>
 
-      {/* Improved tabs styling */}
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full md:w-auto">
@@ -358,7 +350,7 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Activity
-            </TabsTrigger>
+ </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -393,7 +385,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
 
           <TabsContent value="members">
             <div className="grid gap-6">
-              {/* Members List Card */}
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -431,7 +422,6 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
                 </CardContent>
               </Card>
 
-              {/* Add New Member Card */}
               <Card>
                 <CardContent className="p-6">
                   <div className="mb-6">
@@ -440,7 +430,7 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
                       Invite someone new to join the group
                     </p>
                   </div>
-                  <UserManagement 
+                  <User Management 
                     members={group.members} 
                     onMemberAdded={handleMemberAdded} 
                   />
