@@ -26,7 +26,7 @@ export async function GET() {
     // Calculate recent activities (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
+
     const recentGroups = await db.collection('groups')
       .countDocuments({
         createdAt: { $gte: sevenDaysAgo }

@@ -11,19 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Calendar, Filter, Activity, Loader2, RefreshCw } from 'lucide-react';
+import { Search, Calendar, Filter, Activity, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Log {
   id: string;
@@ -67,9 +61,9 @@ export default function LogsPage() {
       const response = await fetch('/api/admin/logs/extract', {
         method: 'POST'
       });
-      
+
       if (!response.ok) throw new Error('Failed to extract logs');
-      
+
       const data = await response.json();
       if (data.success) {
         toast.success(`Successfully extracted ${data.count} logs`);
@@ -91,20 +85,12 @@ export default function LogsPage() {
       log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.userId.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesType = filterType === 'all' || log.type === filterType;
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
 
     return matchesSearch && matchesType && matchesStatus;
   });
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'group': return 'bg-blue-500/10 text-blue-500';
-      case 'member': return 'bg-purple-500/10 text-purple-500';
-      default: return 'bg-gray-500/10 text-gray-500';
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -112,6 +98,14 @@ export default function LogsPage() {
       case 'pending': return 'warning';
       case 'failed': return 'destructive';
       default: return 'secondary';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'group': return 'bg-blue-500/10 text-blue-500';
+      case 'member': return 'bg-purple-500/10 text-purple-500';
+      default: return 'bg-gray-500/10 text-gray-500';
     }
   };
 
@@ -124,19 +118,26 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4"
+        className="space-y-6"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>System Logs</CardTitle>
+        {/* Filters Card */}
+        <Card className="bg-gradient-to-br from-slate-50 via-white to-slate-50">
+          <CardHeader className="p-6">
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-blue-500" />
+              Log Filters
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Search and filter system logs
+            </p>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
+          <CardContent className="p-6 pt-0">
+            <div className="flex flex-col gap-4">
+              <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search logs..."
@@ -146,29 +147,21 @@ export default function LogsPage() {
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[150px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Filter by type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="group">Groups</SelectItem>
-                    <SelectItem value="member">Members</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-[150px]">
-                    <Activity className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="success">Success</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Tabs value={filterType} className="w-full sm:w-auto" onValueChange={setFilterType}>
+                  <TabsList className="grid w-full grid-cols-3 h-9">
+                    <TabsTrigger value="all">All Types</TabsTrigger>
+                    <TabsTrigger value="group">Groups</TabsTrigger>
+                    <TabsTrigger value="member">Members</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Tabs value={filterStatus} className="w-full sm:w-auto" onValueChange={setFilterStatus}>
+                  <TabsList className="grid w-full grid-cols-4 h-9">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="success">Success</TabsTrigger>
+                    <TabsTrigger value="pending">Pending</TabsTrigger>
+                    <TabsTrigger value="failed">Failed</TabsTrigger>
+                  </TabsList>
+                </Tabs>
                 <Button
                   variant="outline"
                   onClick={extractHistoricalLogs}
@@ -178,12 +171,12 @@ export default function LogsPage() {
                   {isExtracting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Extracting...
+                      <span>Extracting...</span>
                     </>
                   ) : (
                     <>
                       <RefreshCw className="h-4 w-4" />
-                      Extract Historical Logs
+                      <span>Extract Logs</span>
                     </>
                   )}
                 </Button>
@@ -192,58 +185,75 @@ export default function LogsPage() {
           </CardContent>
         </Card>
 
+        {/* Logs Table */}
         <Card>
-          <ScrollArea className="h-[calc(100vh-16rem)]">
+          <CardHeader className="p-6">
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-green-500" />
+              System Logs
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Detailed log entries of system activities
+            </p>
+          </CardHeader>
+          <ScrollArea className="h-[calc(100vh-20rem)]">
             {filteredLogs.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 text-center">
-                <Activity className="h-12 w-12 text-muted-foreground mb-4" />
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold">No logs found</h3>
-                <p className="text-sm text-muted-foreground">
-                  Try adjusting your filters or extract historical logs
+                <p className="text-sm text-muted-foreground max-w-sm mt-1">
+                  Try adjusting your filters or extract historical logs to see more entries
                 </p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Details</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredLogs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          {new Date(log.timestamp).toLocaleString()}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{log.action}</TableCell>
-                      <TableCell>
-                        <Badge className={getTypeColor(log.type)}>
-                          {log.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {log.details}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {log.userId}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusColor(log.status)}>
-                          {log.status}
-                        </Badge>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[180px]">Timestamp</TableHead>
+                      <TableHead>Action</TableHead>
+                      <TableHead className="w-[100px]">Type</TableHead>
+                      <TableHead className="hidden md:table-cell">Details</TableHead>
+                      <TableHead className="hidden sm:table-cell">User</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map((log) => (
+                      <TableRow key={log.id} className="group">
+                        <TableCell className="whitespace-nowrap text-xs sm:text-sm">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            {new Date(log.timestamp).toLocaleString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium text-xs sm:text-sm">
+                          {log.action}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${getTypeColor(log.type)} text-xs`}>
+                            {log.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell max-w-xs truncate text-xs sm:text-sm">
+                          {log.details}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm">
+                          {log.userId}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={getStatusColor(log.status)} 
+                            className="text-xs group-hover:animate-pulse"
+                          >
+                            {log.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </ScrollArea>
         </Card>
