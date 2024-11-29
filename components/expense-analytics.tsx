@@ -469,8 +469,8 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
                     },
                     tooltip: {
                       backgroundColor: 'hsl(var(--card))',
-                      titleColor: 'hsl(var(--foreground))',
-                      bodyColor: 'hsl(var(--foreground))',
+                      titleColor: '#FFFFFF',
+                      bodyColor: '#FFFFFF',
                       titleFont: {
                         size: 14,
                         weight: 'normal',
