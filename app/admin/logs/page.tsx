@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader } from "@/components/ui/loader";
 
 interface Log {
   id: string;
@@ -40,10 +41,12 @@ export default function LogsPage() {
 
   const fetchLogs = async () => {
     try {
+      setIsRefreshing(true);
       const response = await fetch('/api/admin/logs', {
         cache: 'no-store',
         headers: {
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
       });
 
@@ -51,21 +54,46 @@ export default function LogsPage() {
       const data = await response.json();
       setLogs(Array.isArray(data.logs) ? data.logs : []);
     } catch (error) {
-      toast.error('Failed to load logs');
       console.error('Logs fetch error:', error);
-      setLogs([]);
+      toast.error('Failed to load logs');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
   };
 
-  // Initial fetch and setup auto-refresh
+  // Initial fetch
   useEffect(() => {
     fetchLogs();
-    // Refresh logs every 30 seconds
-    const interval = setInterval(fetchLogs, 30000);
+  }, []);
+
+  // Set up polling for updates
+  useEffect(() => {
+    // Poll every 5 seconds for new logs
+    const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Set up WebSocket connection if available
+  useEffect(() => {
+    // Check if WebSocket is supported and configured
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+    if (wsUrl) {
+      const ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        const newLog = JSON.parse(event.data);
+        setLogs(prevLogs => [newLog, ...prevLogs]);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      return () => {
+        ws.close();
+      };
+    }
   }, []);
 
   const handleRefresh = () => {
@@ -117,11 +145,7 @@ export default function LogsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

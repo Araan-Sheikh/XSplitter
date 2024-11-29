@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 
 interface DashboardData {
   groups: Array<{
@@ -94,12 +95,8 @@ export default function Dashboard() {
     fetchDashboardData();
   };
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (isLoading) {
+    return <Loader />;
   }
 
   return (

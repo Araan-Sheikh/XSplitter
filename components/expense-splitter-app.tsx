@@ -38,6 +38,7 @@ import { motion } from "framer-motion";
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from "@/utils/currency";
+import { Loader } from "@/components/ui/loader";
 
 interface GroupData {
   _id: string;
@@ -202,184 +203,26 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
   }, [group?.expenses]);
 
   if (showWelcome) {
-    return (
-      <motion.div 
-        className="fixed inset-0 bg-gradient-to-b from-background to-background/95 flex items-center justify-center z-50"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        transition={{ duration: 0.5, delay: 2 }}
-      >
-        <div className="relative">
-          {/* Enhanced Animated Background */}
-          <motion.div
-            className="absolute -inset-40 opacity-20"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ 
-              scale: [0.8, 1, 0.95],
-              opacity: [0, 0.2, 0],
-              rotate: [0, 90, 180]
-            }}
-            transition={{ 
-              duration: 2,
-              times: [0, 0.5, 1],
-              ease: "easeInOut"
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/50 to-primary/20 rounded-full blur-3xl" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/80 to-primary/20 rounded-full blur-2xl" />
-          </motion.div>
-
-          {/* Enhanced Logo Animation */}
-          <motion.div 
-            className="relative flex flex-col items-center"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Animated Logo Container */}
-            <motion.div
-              className="mb-8 relative"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center p-4 relative">
-                {/* Spinning Ring Animation */}
-                <motion.div
-                  className="absolute inset-0 border-t-2 border-primary rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                />
-
-                {/* Logo */}
-                <motion.div
-                  initial={{ rotate: -180, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  transition={{ duration: 0.7, delay: 0.2 }}
-                >
-                  <Image 
-                    src="/logo.png" 
-                    alt="XSplitter Logo" 
-                    width={80} 
-                    height={80} 
-                    className="w-20 h-20 relative z-10"
-                  />
-                </motion.div>
-
-                {/* Pulsing Rings */}
-                <motion.div
-                  className="absolute inset-0 border-2 border-primary/30 rounded-full"
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.1, 0.3] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <motion.div
-                  className="absolute inset-0 border-2 border-primary/20 rounded-full"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.1, 0.2] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
-                />
-              </div>
-            </motion.div>
-
-            {/* Enhanced Text Animations */}
-            <motion.h1
-              className="text-4xl font-bold text-foreground mb-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            >
-              XSplitter
-            </motion.h1>
-            <motion.div
-              className="flex items-center gap-3 text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-            >
-              {/* Loading Dots */}
-              <div className="flex gap-1">
-                {[0, 1, 2].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="w-2 h-2 rounded-full bg-primary"
-                    initial={{ opacity: 0.3 }}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      delay: i * 0.2,
-                      ease: "easeInOut"
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="text-sm">Loading your expenses</span>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.div>
-    );
+    return <Loader />;
   }
 
   if (loading) {
+    return <Loader />;
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <motion.div 
-          className="flex flex-col items-center gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="relative">
-            {/* Spinning loader with multiple rings */}
-            <motion.div
-              className="w-12 h-12 rounded-full border-2 border-primary/20"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="absolute inset-0 rounded-full border-t-2 border-primary"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-            />
-            <motion.div
-              className="absolute inset-1 rounded-full border-t-2 border-primary/50"
-              animate={{ rotate: -180 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-          <motion.p 
-            className="text-sm text-muted-foreground"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Loading group data...
-          </motion.p>
-        </motion.div>
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-red-500">Error</h2>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
       </div>
     );
   }
 
-  if (error || !group) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <div className="rounded-full bg-red-100 p-3 w-12 h-12 mx-auto mb-4 flex items-center justify-center">
-              <Receipt className="h-6 w-6 text-red-500" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2">
-              {error || 'Group not found'}
-            </h2>
-            <p className="text-muted-foreground mb-4">
-              Please try again or contact support if the problem persists.
-            </p>
-            <Button onClick={() => window.location.reload()}>
-              Retry Loading
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (!group) {
+    return <Loader />;
   }
 
   return (

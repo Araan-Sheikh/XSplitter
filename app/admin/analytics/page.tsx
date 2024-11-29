@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader } from "@/components/ui/loader";
 import {
   Line,
   Bar,
@@ -81,11 +82,7 @@ export default function Analytics() {
   };
 
   if (isLoading || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

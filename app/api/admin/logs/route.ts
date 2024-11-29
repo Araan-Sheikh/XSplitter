@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import { headers } from 'next/headers';
 
-export const dynamic = 'force-dynamic';  // Disable static optimization
-export const revalidate = 0;  // Disable cache
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 export async function GET() {
   try {
     const mongoose = await connectToDatabase();
     const db = mongoose.connection.db;
 
-    // Fetch all logs with no caching
+    // Fetch logs with no caching
     const logs = await db.collection('logs')
       .find({})
       .sort({ timestamp: -1 })
@@ -26,13 +26,16 @@ export async function GET() {
       status: log.status
     }));
 
-    return NextResponse.json({ logs: formattedLogs }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+    return NextResponse.json(
+      { logs: formattedLogs },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
       }
-    });
+    );
 
   } catch (error) {
     console.error('Logs API Error:', error);
