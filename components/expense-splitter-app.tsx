@@ -62,37 +62,53 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
 
   const shareLink = `${window.location.origin}/groups/${groupId}`;
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/groups/${groupId}`);
+  const POLLING_INTERVAL = 3000; // 3 seconds
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch group');
+  const fetchGroup = async () => {
+    try {
+      const response = await fetch(`/api/groups/${groupId}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
         }
+      });
 
-        const data = await response.json();
-        console.log('Fetched group data:', data); // Debug log
-
-        if (!data.group) {
-          throw new Error('Group not found');
-        }
-
-        setGroup(data.group);
-      } catch (err) {
-        console.error('Error fetching group:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load group');
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error('Failed to fetch group');
       }
-    };
 
+      const data = await response.json();
+
+      if (!data.group) {
+        throw new Error('Group not found');
+      }
+
+      if (JSON.stringify(data.group) !== JSON.stringify(group)) {
+        setGroup(data.group);
+      }
+    } catch (err) {
+      console.error('Error fetching group:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load group');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchGroup();
   }, [groupId]);
 
   useEffect(() => {
-    // Hide welcome screen after 2.5 seconds
+    const pollInterval = setInterval(() => {
+      if (!loading) {
+        fetchGroup();
+      }
+    }, POLLING_INTERVAL);
+
+    return () => clearInterval(pollInterval);
+  }, [groupId, loading]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setShowWelcome(false), 2500);
     return () => clearTimeout(timer);
   }, []);
@@ -120,12 +136,7 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
         throw new Error('Failed to add member');
       }
 
-      const { member } = await response.json();
-
-      setGroup(prevGroup => ({
-        ...prevGroup!,
-        members: [...prevGroup!.members, member],
-      }));
+      await fetchGroup();
     } catch (err) {
       console.error('Error adding member:', err);
     }
@@ -148,12 +159,7 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
         throw new Error(error.message || 'Failed to add expense');
       }
 
-      const { expense } = await response.json();
-
-      setGroup(prevGroup => ({
-        ...prevGroup!,
-        expenses: [...prevGroup!.expenses, expense],
-      }));
+      await fetchGroup();
     } catch (err) {
       console.error('Error adding expense:', err);
     }
@@ -241,7 +247,7 @@ export function ExpenseSplitterApp({ groupId }: { groupId: string }) {
                       {group.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-
+                  
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h1 className="text-lg sm:text-xl font-semibold tracking-tight truncate">
