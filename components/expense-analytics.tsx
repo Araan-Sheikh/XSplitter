@@ -468,14 +468,21 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
                       },
                     },
                     tooltip: {
-                      backgroundColor: 'hsl(var(--background))',
+                      backgroundColor: 'hsl(var(--card))',
                       titleColor: 'hsl(var(--foreground))',
                       bodyColor: 'hsl(var(--foreground))',
-                      borderColor: 'hsl(var(--border))',
-                      borderWidth: 1,
+                      titleFont: {
+                        size: 14,
+                        weight: 'normal',
+                      },
+                      bodyFont: {
+                        size: 14,
+                      },
                       padding: 12,
                       boxPadding: 4,
-                      usePointStyle: true,
+                      borderColor: 'hsl(var(--border))',
+                      borderWidth: 1,
+                      displayColors: true,
                       callbacks: {
                         title: (tooltipItems) => {
                           return tooltipItems[0].label;
