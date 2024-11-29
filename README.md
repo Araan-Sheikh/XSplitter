@@ -5,6 +5,7 @@ Welcome to **XSplitter**, the ultimate solution for effortlessly managing shared
 ## Table of Contents
 
 - [Features](#features)
+- [Demo](#demo)
 - [Video Ad](#video-ad)
 - [Getting Started](#getting-started)
 - [Installation](#installation)
@@ -25,21 +26,42 @@ Welcome to **XSplitter**, the ultimate solution for effortlessly managing shared
 ## Features
 
 ### Core Features
-- **Real-time Expense Tracking**: Track expenses as they happen with instant updates
-- **Multi-currency Support**: Handle expenses in different currencies with automatic conversion
-- **Smart Settlement**: Get intelligent suggestions for settling debts with minimum transactions
-- **Group Management**: Create and manage multiple expense groups
-- **Expense Analytics**: Visualize spending patterns with interactive charts
-- **Category Tracking**: Organize expenses by categories with detailed pie charts
-
+- **Group Management**: Create and manage groups for tracking shared expenses
+- **Expense Tracking**: Add, edit, and delete expenses within groups
+- **Member Management**: Add and manage group members with their preferred currencies
+- **Real-Time Analytics**: View analytics on expenses and member contributions
+- **Admin Dashboard**: Secure admin routes for managing analytics and logs
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **Secure Authentication**: Protect admin routes with secure authentication mechanisms
+- **Currency Support**: Handle multiple currencies with real-time exchange rates
+- 
 ### Additional Features
-- **Easy Sharing**: Share group links instantly with friends
-- **Split Options**: Split bills equally or with custom ratios
-- **Auto Sync**: All expenses and settlements sync across devices
-- **Secure Transactions**: Encrypted financial data storage
+- **Real-time Updates**: Data syncs every 3 seconds
+- **Custom Splitting**: Support for equal, percentage, and custom splits
+- **Expense Categories**: Organize expenses by type
+- **Export Functionality**: Download expense reports
+- **Search & Filter**: Find specific expenses easily
+- **Activity Logging**: Track all system activities
+- **Data Visualization**: Charts and graphs for expense analysis
 - **Mobile Friendly**: Responsive design for all devices
 - **Quick Actions**: Add expenses and settle bills efficiently
 
+- ## Demo
+
+### Live Demo Steps
+1. **Group Creation**
+   - Create new group "Demo Trip"
+   - Add initial members
+
+2. **Expense Management**
+   - Add new expense
+   - Show splitting calculation
+   - Demonstrate real-time updates
+
+3. **Admin Features**
+   - View analytics dashboard
+   - Check activity logs
+   - Monitor system status
 
 ## Video Ad
 
@@ -71,9 +93,17 @@ To embark on your journey with XSplitter, follow these simple steps to set up th
 
 3. **Set up environment variables**:
    Create a `.env.local` file in the root directory and add your MongoDB connection string:
-   ```plaintext
+      ```env
    MONGODB_URI=your_mongodb_connection_string
+   ADMIN_USERNAME=your_admin_username
+   ADMIN_PASSWORD=your_admin_password
    ```
+
+ 4. **Database Configuration**:
+   - Create MongoDB Atlas cluster
+   - Whitelist IP address
+   - Create database user
+   - Get connection string
 
 ### Usage
 
@@ -84,6 +114,12 @@ To embark on your journey with XSplitter, follow these simple steps to set up th
    yarn dev
    # or
    pnpm dev
+   
+   # Build production
+   npm run build
+
+   # Start production server
+   npm run start
    ```
 
 2. **Open your browser**:
@@ -92,36 +128,81 @@ To embark on your journey with XSplitter, follow these simple steps to set up th
 3. **Start using the application**:
    Create groups, add members, and start tracking expenses effortlessly!
 
+4. **Using admin panel**:
+   Navigate to [http://localhost:3000/admin](http://localhost:3000/admin) to view the admin panel.
+
 ## Project Structure
 
 The project is organized in a way that promotes clarity and ease of navigation. Here’s a breakdown of the structure:
 
-```
-XSplitter
-├── app
-│   ├── about
-│   ├── create-group
-│   ├── features
-│   ├── groups
-│   └── page.tsx
-├── components
-│   ├── ui
-│   ├── expense-form.tsx
-│   ├── expense-list.tsx
-│   └── user-management.tsx
-├── models
+```bash
+xsplitter/
+├── app/
+│   ├── admin/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── ... (more files)
+│   ├── api/
+│   │   ├── admin/
+│   │   │   ├── analytics/
+│   │   │   ├── check-auth/
+│   │   │   ├── extract-logs/
+│   │   │   ├── login/
+│   │   │   ├── logout/
+│   │   │   └── ... (more API routes)
+│   │   ├── groups/
+│   │   │   ├── [groupId]/
+│   │   │   │   ├── expenses/
+│   │   │   │   ├── members/
+│   │   │   │   └── ... (group API routes)
+│   │   └── ... ( API routes)
+│   ├── about/
+│   ├── features/
+│   ├── 404.tsx
+│   └── ... (pages)
+├── components/
+│   ├── create-group/
+│   ├── manage-members.tsx
+│   ├── navbar.tsx
+│   ├── ui/
+│   │   ├── alert-dialog.tsx
+│   │   ├── avatar.tsx
+│   │   ├── badge.tsx
+│   │   ├── button.tsx
+│   │   └── ... (more UI components)
+│   └── ... ( components)
+├── lib/
+│   ├── extractLogs.ts
+│   ├── logger.ts
+│   ├── mongodb.ts
+│   └── utils.ts
+├── models/
 │   └── Group.ts
-├── lib
-│   └── mongodb.ts
-├── pages
-│   └── api
-│       └── groups
-├── public
-│   └── team
-├── styles
-│   └── globals.css
-├── .env.local
+├── scripts/
+│   ├── check-ip.ts
+│   ├── test-connection.ts
+│   └── test-direct.ts
+├── types/
+│   ├── currency.ts
+│   ├── expense.ts
+│   └── global.d.ts
+├── public/
+│   └── ... (static assets)
+├── styles/
+│   └── ... (global styles)
+├── .eslintrc.json
+├── .gitignore
+├── components.json
+├── next.config.js
+├── next.config.mjs
+├── next-env.d.ts
+├── postcss.config.mjs
+├── .env
+├── middleware.ts
 ├── package.json
+├── tailwind.config.ts
+├── tsconfig.json
+├── package-lock.json
 └── README.md
 ```
 
