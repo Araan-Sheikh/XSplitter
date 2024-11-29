@@ -53,11 +53,36 @@ export default function LogsPage() {
       const response = await fetch('/api/admin/logs');
       if (!response.ok) throw new Error('Failed to fetch logs');
       const data = await response.json();
-      setLogs(data.logs);
+      setLogs(data.logs || []);
     } catch (error) {
-      toast.error('Failed to load activity logs');
+      toast.error('Failed to load logs');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const extractHistoricalLogs = async () => {
+    try {
+      setIsExtracting(true);
+      const response = await fetch('/api/admin/logs/extract', {
+        method: 'POST'
+      });
+      
+      if (!response.ok) throw new Error('Failed to extract logs');
+      
+      const data = await response.json();
+      if (data.success) {
+        toast.success(`Successfully extracted ${data.count} logs`);
+        // Fetch updated logs after extraction
+        await fetchLogs();
+      } else {
+        throw new Error(data.error || 'Extraction failed');
+      }
+    } catch (error) {
+      toast.error('Failed to extract logs');
+      console.error('Log extraction error:', error);
+    } finally {
+      setIsExtracting(false);
     }
   };
 
@@ -73,6 +98,14 @@ export default function LogsPage() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'group': return 'bg-blue-500/10 text-blue-500';
+      case 'member': return 'bg-purple-500/10 text-purple-500';
+      default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'success';
@@ -82,34 +115,13 @@ export default function LogsPage() {
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'group': return 'bg-blue-500/10 text-blue-500';
-      case 'member': return 'bg-purple-500/10 text-purple-500';
-      default: return 'bg-gray-500/10 text-gray-500';
-    }
-  };
-
-  const extractHistoricalLogs = async () => {
-    try {
-      setIsExtracting(true);
-      const response = await fetch('/api/admin/extract-logs', {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Failed to extract logs');
-      
-      const data = await response.json();
-      toast.success(data.message);
-      
-      // Refresh the logs
-      await fetchLogs();
-    } catch (error) {
-      toast.error('Failed to extract historical logs');
-    } finally {
-      setIsExtracting(false);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -118,14 +130,10 @@ export default function LogsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col gap-4"
       >
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Activity Logs</h1>
-          <Badge variant="outline" className="px-4">
-            {filteredLogs.length} Activities
-          </Badge>
-        </div>
-
         <Card>
+          <CardHeader>
+            <CardTitle>System Logs</CardTitle>
+          </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -137,7 +145,7 @@ export default function LogsPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Select value={filterType} onValueChange={setFilterType}>
                   <SelectTrigger className="w-[150px]">
                     <Filter className="mr-2 h-4 w-4" />
@@ -165,7 +173,7 @@ export default function LogsPage() {
                   variant="outline"
                   onClick={extractHistoricalLogs}
                   disabled={isExtracting}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 whitespace-nowrap"
                 >
                   {isExtracting ? (
                     <>
@@ -186,47 +194,57 @@ export default function LogsPage() {
 
         <Card>
           <ScrollArea className="h-[calc(100vh-16rem)]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLogs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        {new Date(log.timestamp).toLocaleString()}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{log.action}</TableCell>
-                    <TableCell>
-                      <Badge className={getTypeColor(log.type)}>
-                        {log.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {log.details}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {log.userId}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(log.status)}>
-                        {log.status}
-                      </Badge>
-                    </TableCell>
+            {filteredLogs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <Activity className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">No logs found</h3>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your filters or extract historical logs
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          {new Date(log.timestamp).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{log.action}</TableCell>
+                      <TableCell>
+                        <Badge className={getTypeColor(log.type)}>
+                          {log.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {log.details}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {log.userId}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusColor(log.status)}>
+                          {log.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </ScrollArea>
         </Card>
       </motion.div>
