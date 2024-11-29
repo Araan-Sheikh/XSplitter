@@ -1,32 +1,31 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
+import { headers } from 'next/headers';
+
+export const dynamic = 'force-dynamic';  // Disable static optimization
+export const revalidate = 0;  // Disable cache
 
 export async function GET() {
   try {
     const mongoose = await connectToDatabase();
     const db = mongoose.connection.db;
 
-    // Fetch all groups with their slugs
+    // Fetch all groups with no caching
     const groups = await db.collection('groups')
       .find({})
       .sort({ createdAt: -1 })
       .toArray();
 
-    const formattedGroups = groups.map(group => {
-      // Calculate member count safely
-      const memberCount = Array.isArray(group.members) ? group.members.length : 0;
-
-      return {
-        id: group._id.toString(),
-        groupId: group._id.toString(), // Use _id as groupId for the visit link
-        name: group.name || '',
-        type: group.type || 'standard',
-        memberCount,
-        currency: group.currency || 'USD',
-        createdAt: group.createdAt || new Date(),
-        status: memberCount > 0 ? 'active' : 'inactive', // Update status based on members
-      };
-    });
+    const formattedGroups = groups.map(group => ({
+      id: group._id.toString(),
+      groupId: group._id.toString(),
+      name: group.name || '',
+      type: group.type || 'standard',
+      memberCount: Array.isArray(group.members) ? group.members.length : 0,
+      currency: group.currency || 'USD',
+      createdAt: group.createdAt || new Date(),
+      status: group.status || 'inactive'
+    }));
 
     // Calculate accurate stats
     const totalGroups = formattedGroups.length;
@@ -72,18 +71,16 @@ export async function GET() {
       latestActivities
     }, {
       headers: {
-        'Cache-Control': 'no-store, must-revalidate',
-        'Pragma': 'no-cache'
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
 
   } catch (error) {
     console.error('Dashboard API Error:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch dashboard data',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
+      { error: 'Failed to fetch dashboard data' },
       { status: 500 }
     );
   }
