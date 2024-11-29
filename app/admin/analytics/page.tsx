@@ -80,14 +80,44 @@ export default function Analytics() {
     }
   };
 
-  if (isLoading || !data) {
+   if (loading || !data) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <motion.div 
+          className="flex flex-col items-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="relative">
+            {/* Spinning loader with multiple rings */}
+            <motion.div
+              className="w-12 h-12 rounded-full border-2 border-primary/20"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute inset-0 rounded-full border-t-2 border-primary"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute inset-1 rounded-full border-t-2 border-primary/50"
+              animate={{ rotate: -180 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+          <motion.p 
+            className="text-sm text-muted-foreground"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            Loading admin panel...
+          </motion.p>
+        </motion.div>
       </div>
     );
   }
-
   return (
     <ScrollArea className="h-screen">
       <div className="p-4 md:p-6 space-y-6">
