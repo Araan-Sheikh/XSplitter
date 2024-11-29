@@ -36,61 +36,68 @@ export default function LogsPage() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isExtracting, setIsExtracting] = useState(false);
-
-  useEffect(() => {
-    fetchLogs();
-  }, []);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchLogs = async () => {
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/admin/logs');
+      const response = await fetch('/api/admin/logs', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+
       if (!response.ok) throw new Error('Failed to fetch logs');
       const data = await response.json();
-      setLogs(data.logs || []);
+      setLogs(Array.isArray(data.logs) ? data.logs : []);
     } catch (error) {
       toast.error('Failed to load logs');
+      console.error('Logs fetch error:', error);
+      setLogs([]);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
+  // Initial fetch and setup auto-refresh
+  useEffect(() => {
+    fetchLogs();
+    // Refresh logs every 30 seconds
+    const interval = setInterval(fetchLogs, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchLogs();
+  };
+
   const extractHistoricalLogs = async () => {
+    setIsExtracting(true);
     try {
-      setIsExtracting(true);
-      const response = await fetch('/api/admin/logs/extract', {
-        method: 'POST'
-      });
-
+      const response = await fetch('/api/admin/logs/extract', { method: 'POST' });
       if (!response.ok) throw new Error('Failed to extract logs');
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success(`Successfully extracted ${data.count} logs`);
-        // Fetch updated logs after extraction
-        await fetchLogs();
-      } else {
-        throw new Error(data.error || 'Extraction failed');
-      }
+      toast.success('Historical logs extracted successfully');
+      fetchLogs(); // Refresh logs after extraction
     } catch (error) {
-      toast.error('Failed to extract logs');
-      console.error('Log extraction error:', error);
+      toast.error('Failed to extract historical logs');
     } finally {
       setIsExtracting(false);
     }
   };
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = Array.isArray(logs) ? logs.filter(log => {
     const matchesSearch = 
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.userId.toLowerCase().includes(searchTerm.toLowerCase());
+      (log.action?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (log.details?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (log.userId?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
     const matchesType = filterType === 'all' || log.type === filterType;
     const matchesStatus = filterStatus === 'all' || log.status === filterStatus;
 
     return matchesSearch && matchesType && matchesStatus;
-  });
+  }) : [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -118,27 +125,42 @@ export default function LogsPage() {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-2 md:p-6 space-y-4 md:space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-4 md:space-y-6"
       >
+        {/* Header with Refresh Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <h2 className="text-xl md:text-2xl font-bold">System Logs</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="gap-2 w-full sm:w-auto"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
+
         {/* Filters Card */}
         <Card className="bg-gradient-to-br from-slate-50 via-white to-slate-50">
-          <CardHeader className="p-6">
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
               <Filter className="h-5 w-5 text-blue-500" />
               Log Filters
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Search and filter system logs
             </p>
           </CardHeader>
-          <CardContent className="p-6 pt-0">
+          <CardContent className="p-4 md:p-6 pt-0">
             <div className="flex flex-col gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search logs..."
                   className="pl-10"
@@ -149,34 +171,34 @@ export default function LogsPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Tabs value={filterType} className="w-full sm:w-auto" onValueChange={setFilterType}>
                   <TabsList className="grid w-full grid-cols-3 h-9">
-                    <TabsTrigger value="all">All Types</TabsTrigger>
-                    <TabsTrigger value="group">Groups</TabsTrigger>
-                    <TabsTrigger value="member">Members</TabsTrigger>
+                    <TabsTrigger value="all" className="text-xs md:text-sm">All Types</TabsTrigger>
+                    <TabsTrigger value="group" className="text-xs md:text-sm">Groups</TabsTrigger>
+                    <TabsTrigger value="member" className="text-xs md:text-sm">Members</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <Tabs value={filterStatus} className="w-full sm:w-auto" onValueChange={setFilterStatus}>
                   <TabsList className="grid w-full grid-cols-4 h-9">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="success">Success</TabsTrigger>
-                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                    <TabsTrigger value="failed">Failed</TabsTrigger>
+                    <TabsTrigger value="all" className="text-xs md:text-sm">All</TabsTrigger>
+                    <TabsTrigger value="success" className="text-xs md:text-sm">Success</TabsTrigger>
+                    <TabsTrigger value="pending" className="text-xs md:text-sm">Pending</TabsTrigger>
+                    <TabsTrigger value="failed" className="text-xs md:text-sm">Failed</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <Button
                   variant="outline"
                   onClick={extractHistoricalLogs}
                   disabled={isExtracting}
-                  className="flex items-center gap-2 whitespace-nowrap"
+                  className="flex items-center gap-2 whitespace-nowrap w-full sm:w-auto"
                 >
                   {isExtracting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Extracting...</span>
+                      <span className="text-xs md:text-sm">Extracting...</span>
                     </>
                   ) : (
                     <>
                       <RefreshCw className="h-4 w-4" />
-                      <span>Extract Logs</span>
+                      <span className="text-xs md:text-sm">Extract Logs</span>
                     </>
                   )}
                 </Button>
@@ -187,21 +209,21 @@ export default function LogsPage() {
 
         {/* Logs Table */}
         <Card>
-          <CardHeader className="p-6">
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
               <Activity className="h-5 w-5 text-green-500" />
               System Logs
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
               Detailed log entries of system activities
             </p>
           </CardHeader>
-          <ScrollArea className="h-[calc(100vh-20rem)]">
+          <ScrollArea className="h-[calc(100vh-24rem)]">
             {filteredLogs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold">No logs found</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mt-1">
+              <div className="flex flex-col items-center justify-center p-4 md:p-8 text-center">
+                <AlertCircle className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground mb-4" />
+                <h3 className="text-base md:text-lg font-semibold">No logs found</h3>
+                <p className="text-xs md:text-sm text-muted-foreground max-w-sm mt-1">
                   Try adjusting your filters or extract historical logs to see more entries
                 </p>
               </div>
@@ -210,9 +232,9 @@ export default function LogsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[180px]">Timestamp</TableHead>
+                      <TableHead className="w-[140px] md:w-[180px]">Timestamp</TableHead>
                       <TableHead>Action</TableHead>
-                      <TableHead className="w-[100px]">Type</TableHead>
+                      <TableHead className="w-[90px] md:w-[100px]">Type</TableHead>
                       <TableHead className="hidden md:table-cell">Details</TableHead>
                       <TableHead className="hidden sm:table-cell">User</TableHead>
                       <TableHead>Status</TableHead>
@@ -221,30 +243,30 @@ export default function LogsPage() {
                   <TableBody>
                     {filteredLogs.map((log) => (
                       <TableRow key={log.id} className="group">
-                        <TableCell className="whitespace-nowrap text-xs sm:text-sm">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <TableCell className="whitespace-nowrap text-xs md:text-sm">
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                             {new Date(log.timestamp).toLocaleString()}
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium text-xs sm:text-sm">
+                        <TableCell className="font-medium text-xs md:text-sm">
                           {log.action}
                         </TableCell>
                         <TableCell>
-                          <Badge className={`${getTypeColor(log.type)} text-xs`}>
+                          <Badge className={`${getTypeColor(log.type)} text-[10px] md:text-xs`}>
                             {log.type}
                           </Badge>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell max-w-xs truncate text-xs sm:text-sm">
+                        <TableCell className="hidden md:table-cell max-w-xs truncate text-xs md:text-sm">
                           {log.details}
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell whitespace-nowrap text-xs sm:text-sm">
+                        <TableCell className="hidden sm:table-cell whitespace-nowrap text-xs md:text-sm">
                           {log.userId}
                         </TableCell>
                         <TableCell>
                           <Badge 
                             variant={getStatusColor(log.status)} 
-                            className="text-xs group-hover:animate-pulse"
+                            className="text-[10px] md:text-xs group-hover:animate-pulse"
                           >
                             {log.status}
                           </Badge>

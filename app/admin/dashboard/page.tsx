@@ -20,10 +20,12 @@ import {
   ArrowUpRight,
   CircleDot,
   ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
 
 interface DashboardData {
   groups: Array<{
@@ -35,6 +37,7 @@ interface DashboardData {
     createdAt: string;
     status: 'active' | 'inactive';
     slug: string;
+    groupId: string;
   }>;
   stats: {
     totalGroups: number;
@@ -62,19 +65,33 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/admin/dashboard');
+      const response = await fetch('/api/admin/dashboard', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const dashboardData = await response.json();
       setData(dashboardData);
     } catch (error) {
       toast.error('Failed to load dashboard data');
+      console.error('Dashboard fetch error:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setIsLoading(true);
+    fetchDashboardData();
   };
 
   if (isLoading || !data) {
@@ -88,6 +105,18 @@ export default function Dashboard() {
   return (
     <ScrollArea className="h-screen">
       <div className="p-4 md:p-6 space-y-6">
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
         {/* Overview Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <motion.div
@@ -249,15 +278,19 @@ export default function Dashboard() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Link
-                            href={`/groups/${group.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 transition-colors"
-                          >
-                            <span className="hidden sm:inline">Visit</span>
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
+                          {group.groupId ? (
+                            <Link
+                              href={`/groups/${encodeURIComponent(group.groupId)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-sm text-blue-500 hover:text-blue-600 transition-colors"
+                            >
+                              <span className="hidden sm:inline">Visit</span>
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No link available</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
