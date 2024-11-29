@@ -214,12 +214,12 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
   // Calculate enhanced statistics based on filtered expenses
   const enhancedStatistics = useMemo(() => {
     const filteredExpenses = filterExpensesByTimePeriod(expenses);
-
+    
     // Filter expenses by selected currency
     const expensesInCurrency = filteredExpenses.filter(
       expense => expense.currency === selectedCurrency
     );
-
+    
     // Calculate category distribution with transaction counts
     const categoryTotals = expensesInCurrency.reduce((acc, expense) => {
       const category = expense.category || 'Other';
@@ -477,6 +477,9 @@ export function ExpenseAnalytics({ expenses, baseCurrency }: ExpenseAnalyticsPro
                       boxPadding: 4,
                       usePointStyle: true,
                       callbacks: {
+                        title: (tooltipItems) => {
+                          return tooltipItems[0].label;
+                        },
                         label: (context) => {
                           const value = context.raw as number;
                           return ` ${formatCurrency(value, selectedCurrency)}`;
