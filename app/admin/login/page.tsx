@@ -58,9 +58,9 @@ export default function AdminLogin() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="space-y-3 pb-2">
             <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2">
-                <Shield className="h-8 w-8 text-blue-500" />
-              </div>
+            <div className="h-16 w-16 rounded-full bg-blue-500/10 flex items-center justify-center mb-2">
+            <img src="/logo.png" alt="XSplitter Logo" className="h-8 w-8" />
+            </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center">
               Admin Login
@@ -138,7 +138,7 @@ export default function AdminLogin() {
               </div>
               <p className="text-xs text-center text-muted-foreground">
                 This area is restricted to authorized administrators only.
-                All login attempts are monitored and logged.
+                All login attempts are not monitored and not logged.
               </p>
             </div>
           </CardContent>
